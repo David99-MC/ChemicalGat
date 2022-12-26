@@ -34,8 +34,8 @@ class CHEMICALGAT_API ABlasterCharacter : public ACharacter
 	/** InputAction variables to be bound in UE editor */
 
 	/** Jump Input Action */
-	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	// class UInputAction* JumpAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* JumpAction;
 
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
