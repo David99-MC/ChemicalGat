@@ -13,6 +13,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class UWidgetComponent;
 
 UCLASS()
 class CHEMICALGAT_API ABlasterCharacter : public ACharacter
@@ -32,7 +33,6 @@ class CHEMICALGAT_API ABlasterCharacter : public ACharacter
 	UInputMappingContext* DefaultBlasterMappingContext;
 
 	/** InputAction variables to be bound in UE editor */
-
 	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
@@ -45,6 +45,9 @@ class CHEMICALGAT_API ABlasterCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
+	UWidgetComponent* OverheadWidget;
+	
 public:
 	// Sets default values for this character's properties
 	ABlasterCharacter();
