@@ -28,17 +28,19 @@ public:
 	// Sets default values for this actor's properties
 	AWeapon();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+	
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;
+
+	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UStaticMeshComponent* WeaponMagMesh;
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USphereComponent* AreaSphere;
@@ -54,5 +56,10 @@ protected:
 	virtual void OnAreaSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-	virtual void OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	virtual void OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+public:
+	void ShowPickupWidget(bool bShowWidget);
+	FORCEINLINE void SetWeaponState(EWeaponState State) { WeaponState = State; }
+
 };

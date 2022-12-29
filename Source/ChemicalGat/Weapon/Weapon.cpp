@@ -20,6 +20,12 @@ AWeapon::AWeapon()
 	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	WeaponMagMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mag Mesh"));
+	WeaponMagMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("Mag_Socket"));
+	WeaponMagMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	WeaponMagMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	WeaponMagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Area Sphere"));
 	AreaSphere->SetupAttachment(RootComponent);
@@ -40,7 +46,7 @@ void AWeapon::BeginPlay()
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnAreaSphereBeginOverlap);
-		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnAreaSphereEndOverlap);
+		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &ThisClass::OnAreaSphereEndOverlap);
 	}
 	if (PickupWidget)
 	{
@@ -59,13 +65,21 @@ void AWeapon::OnAreaSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 {
 	if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor))
 	{
-		if (PickupWidget)
-			PickupWidget->SetVisibility(true);
+		BlasterCharacter->SetOverlappingWeapon(this);
 	}
 }
 
-void AWeapon::OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AWeapon::OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-
+	if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor))
+	{
+		BlasterCharacter->SetOverlappingWeapon(nullptr);
+	}
 }
 
+void AWeapon::ShowPickupWidget(bool bShowWidget)
+{
+	if (PickupWidget)
+		PickupWidget->SetVisibility(bShowWidget);
+	
+}

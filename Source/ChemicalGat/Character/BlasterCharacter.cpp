@@ -5,11 +5,13 @@
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/WidgetComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "ChemicalGat/Weapon/Weapon.h"
+#include "ChemicalGat/BlasterComponents/CombatComponent.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -25,10 +27,9 @@ ABlasterCharacter::ABlasterCharacter()
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 700.f;
+	GetCharacterMovement()->JumpZVelocity = 500.f;
 	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
-	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
+	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
@@ -44,6 +45,16 @@ ABlasterCharacter::ABlasterCharacter()
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Overhead Widget"));
 	OverheadWidget->SetupAttachment(RootComponent);
+
+	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat Component"));
+	CombatComponent->SetIsReplicated(true);
+}
+
+void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 }
 
 // Called when the game starts or when spawned
@@ -58,12 +69,10 @@ void ABlasterCharacter::BeginPlay()
 		}
 	}
 }
-
 // Called every frame
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -77,12 +86,24 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Move);
 		
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Look);
+
+		// Equipping
+		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Equip);
 	}
 	
+}
+
+void ABlasterCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (CombatComponent)
+	{
+		CombatComponent->Character = this;
+	}
 }
 
 void ABlasterCharacter::Move(const FInputActionValue& Value)
@@ -119,3 +140,45 @@ void ABlasterCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void ABlasterCharacter::Equip(const FInputActionValue& Value)
+{
+	// input is a bool
+	bool bCanEquip = Value.Get<bool>();
+	if (HasAuthority() && bCanEquip && CombatComponent)
+	{
+		CombatComponent->EquipWeapon(OverlappingWeapon);
+	}
+}
+
+void ABlasterCharacter::SetOverlappingWeapon(AWeapon* CurrentWeapon)
+{
+	// OverlappingWeapon can be considered as *LastWeapon before getting new value from CurrentWeapon
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(false);
+		}
+	}
+	OverlappingWeapon = CurrentWeapon;
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(true);
+		}
+	}
+}
+
+void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+{
+	if (LastWeapon)
+	{
+		LastWeapon->ShowPickupWidget(false);
+	}
+
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+}
