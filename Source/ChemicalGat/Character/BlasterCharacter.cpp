@@ -144,7 +144,22 @@ void ABlasterCharacter::Equip(const FInputActionValue& Value)
 {
 	// input is a bool
 	bool bCanEquip = Value.Get<bool>();
-	if (HasAuthority() && bCanEquip && CombatComponent)
+	if (bCanEquip && CombatComponent)
+	{
+		if (HasAuthority())
+		{
+			CombatComponent->EquipWeapon(OverlappingWeapon);
+		}
+		else // function being called from the client instead
+		{
+			ServerEquipButtonPressed();
+		}
+	}
+}
+
+void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
+{
+	if (CombatComponent)
 	{
 		CombatComponent->EquipWeapon(OverlappingWeapon);
 	}
@@ -182,3 +197,4 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 		OverlappingWeapon->ShowPickupWidget(true);
 	}
 }
+

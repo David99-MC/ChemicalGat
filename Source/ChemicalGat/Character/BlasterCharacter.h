@@ -89,4 +89,8 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UCombatComponent* CombatComponent;
 
+	// A Remote Procedure Call (RPC) to allow the client to also pick up the weapon 
+	UFUNCTION(Server, Reliable)
+	void ServerEquipButtonPressed();
+
 };
