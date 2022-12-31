@@ -43,15 +43,20 @@ protected:
 	/** Called for Equipping input */
 	void Equip(const FInputActionValue& Value);
 
+	/** Called for Crouching input */
+	void CrouchButtonPressed(const FInputActionValue& Value);
+
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	void SetOverlappingWeapon(AWeapon* Weapon); 
+	void SetOverlappingWeapon(AWeapon* Weapon);
 
-private:
+	bool IsWeaponEquipped(); 
+
+private: // Variables
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
@@ -77,6 +82,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* EquipAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* CrouchAction;
+	/** ---------------------------------------------- */
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* OverheadWidget;
 
@@ -89,6 +98,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UCombatComponent* CombatComponent;
 
+private: 
 	// A Remote Procedure Call (RPC) to allow the client to also pick up the weapon 
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();

@@ -15,10 +15,11 @@ class CHEMICALGAT_API UCombatComponent : public UActorComponent
 
 public:	
 	UCombatComponent();
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	// Setting ABlasterCharacter a friend class so it will have access to all of this class' properties 
 	// including from private sections
 	friend class ABlasterCharacter;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -27,7 +28,9 @@ public:
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
 private:	
-	ABlasterCharacter* Character;
+	ABlasterCharacter* BlasterCharacter;
+
+	UPROPERTY(Replicated)
 	AWeapon* EquippedWeapon;
 		
 };

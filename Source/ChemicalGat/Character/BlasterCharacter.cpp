@@ -48,6 +48,9 @@ ABlasterCharacter::ABlasterCharacter()
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat Component"));
 	CombatComponent->SetIsReplicated(true);
+
+	// Enabling the Character to crouch. Can also tick the box in the Character blueprint
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -93,6 +96,9 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 		// Equipping
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Equip);
+
+		// Crouching
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::CrouchButtonPressed);
 	}
 	
 }
@@ -102,7 +108,7 @@ void ABlasterCharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	if (CombatComponent)
 	{
-		CombatComponent->Character = this;
+		CombatComponent->BlasterCharacter = this;
 	}
 }
 
@@ -165,6 +171,14 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 	}
 }
 
+void ABlasterCharacter::CrouchButtonPressed(const FInputActionValue& Value)
+{
+	if (bIsCrouched)
+		UnCrouch();
+	else
+		Crouch();
+}
+
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* CurrentWeapon)
 {
 	// OverlappingWeapon can be considered as *LastWeapon before getting new value from CurrentWeapon
@@ -198,3 +212,7 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
+bool ABlasterCharacter::IsWeaponEquipped()
+{
+	return (CombatComponent && CombatComponent->EquippedWeapon);
+}
