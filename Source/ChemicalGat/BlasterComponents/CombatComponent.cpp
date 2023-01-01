@@ -25,6 +25,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
+	DOREPLIFETIME(UCombatComponent, bIsAiming);
 }
 
 // Called every frame
@@ -39,11 +40,24 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if (!BlasterCharacter || !WeaponToEquip) return;
 	EquippedWeapon = WeaponToEquip;
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+
+	// Equipping the weapon
 	const USkeletalMeshSocket* HandSocket = BlasterCharacter->GetMesh()->GetSocketByName(FName("RightHandSocket"));
 	if (HandSocket)
 	{
 		HandSocket->AttachActor(EquippedWeapon, BlasterCharacter->GetMesh());
 	}
 	EquippedWeapon->SetOwner(BlasterCharacter);
+}
+
+void UCombatComponent::SetAiming(bool bAiming)
+{
+	bIsAiming = bAiming;
+	ServerSetAiming(bIsAiming);
+}
+
+void UCombatComponent::ServerSetAiming_Implementation(bool bAiming)
+{
+	bIsAiming = bAiming;
 }
 

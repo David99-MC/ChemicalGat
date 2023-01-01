@@ -46,8 +46,8 @@ ABlasterCharacter::ABlasterCharacter()
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Overhead Widget"));
 	OverheadWidget->SetupAttachment(RootComponent);
 
-	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat Component"));
-	CombatComponent->SetIsReplicated(true);
+	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat Component"));
+	Combat->SetIsReplicated(true);
 
 	// Enabling the Character to crouch. Can also tick the box in the Character blueprint
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -76,6 +76,7 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	GetCharacterMovement()->MaxWalkSpeed = (GetIsWeaponEquipped() && GetIsAiming()) ? 350.f : 600.f;
 }
 
 // Called to bind functionality to input
@@ -87,28 +88,25 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Move);
-		
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Look);
-
 		// Equipping
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Equip);
-
+		// Aiming
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Aim);
 		// Crouching
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::CrouchButtonPressed);
 	}
-	
 }
 
 void ABlasterCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	if (CombatComponent)
+	if (Combat)
 	{
-		CombatComponent->BlasterCharacter = this;
+		Combat->BlasterCharacter = this;
 	}
 }
 
@@ -150,11 +148,11 @@ void ABlasterCharacter::Equip(const FInputActionValue& Value)
 {
 	// input is a bool
 	bool bCanEquip = Value.Get<bool>();
-	if (bCanEquip && CombatComponent)
+	if (bCanEquip && Combat)
 	{
 		if (HasAuthority())
 		{
-			CombatComponent->EquipWeapon(OverlappingWeapon);
+			Combat->EquipWeapon(OverlappingWeapon);
 		}
 		else // function being called from the client instead
 		{
@@ -165,14 +163,21 @@ void ABlasterCharacter::Equip(const FInputActionValue& Value)
 
 void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 {
-	if (CombatComponent)
+	if (Combat)
 	{
-		CombatComponent->EquipWeapon(OverlappingWeapon);
+		Combat->EquipWeapon(OverlappingWeapon);
 	}
+}
+
+void ABlasterCharacter::Aim(const FInputActionValue& Value)
+{
+	if (Combat)
+		Combat->SetAiming(Value.Get<bool>());	
 }
 
 void ABlasterCharacter::CrouchButtonPressed(const FInputActionValue& Value)
 {
+	// Calling the Crouch/UnCrouch functions from the Character parent class
 	if (bIsCrouched)
 		UnCrouch();
 	else
@@ -212,7 +217,12 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
-bool ABlasterCharacter::IsWeaponEquipped()
+bool ABlasterCharacter::GetIsWeaponEquipped() const
+{ 
+	return (Combat && Combat->EquippedWeapon);
+}
+
+bool ABlasterCharacter::GetIsAiming() const
 {
-	return (CombatComponent && CombatComponent->EquippedWeapon);
+	return (Combat && Combat->bIsAiming); 
 }

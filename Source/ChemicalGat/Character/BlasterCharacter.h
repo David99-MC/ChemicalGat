@@ -31,18 +31,15 @@ public:
 	virtual void PostInitializeComponents() override;
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
-
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-
 	/** Called for Equipping input */
 	void Equip(const FInputActionValue& Value);
-
+	/** Called for Aiming input */
+	void Aim(const FInputActionValue& Value);
 	/** Called for Crouching input */
 	void CrouchButtonPressed(const FInputActionValue& Value);
 
@@ -51,10 +48,9 @@ public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
 	void SetOverlappingWeapon(AWeapon* Weapon);
-
-	bool IsWeaponEquipped(); 
+	bool GetIsWeaponEquipped() const;
+	bool GetIsAiming() const;
 
 private: // Variables
 	/** Camera boom positioning the camera behind the character */
@@ -72,18 +68,16 @@ private: // Variables
 	/** InputAction variables to be bound in UE editor */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* EquipAction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* CrouchAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* AimAction;
 	/** ---------------------------------------------- */
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
@@ -91,12 +85,12 @@ private: // Variables
 
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_OverlappingWeapon)
 	AWeapon* OverlappingWeapon;
-
+	
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
 	UPROPERTY(VisibleAnywhere)
-	UCombatComponent* CombatComponent;
+	UCombatComponent* Combat;
 
 private: 
 	// A Remote Procedure Call (RPC) to allow the client to also pick up the weapon 
