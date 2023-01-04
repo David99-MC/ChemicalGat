@@ -12,6 +12,7 @@
 #include "Net/UnrealNetwork.h"
 #include "ChemicalGat/Weapon/Weapon.h"
 #include "ChemicalGat/BlasterComponents/CombatComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -27,11 +28,11 @@ ABlasterCharacter::ABlasterCharacter()
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 700.f;
+	GetCharacterMovement()->JumpZVelocity = 800.f;
 	GetCharacterMovement()->AirControl = 0.35f;
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
-	GetCharacterMovement()->GravityScale = 4.f;
+	GetCharacterMovement()->GravityScale = 3.f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -52,6 +53,9 @@ ABlasterCharacter::ABlasterCharacter()
 
 	// Enabling the Character to crouch. Can also tick the box in the Character blueprint
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -77,7 +81,6 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	GetCharacterMovement()->MaxWalkSpeed = (GetIsWeaponEquipped() && GetIsAiming()) ? 350.f : 600.f;
 }
 
 // Called to bind functionality to input
