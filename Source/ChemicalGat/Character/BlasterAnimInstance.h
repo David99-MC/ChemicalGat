@@ -25,9 +25,6 @@ private:
 	ABlasterCharacter* BlasterCharacter;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float Speed;
-
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bIsInAir;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
@@ -44,5 +41,22 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	bool bIsAiming;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float Speed;
+
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	float YawOffset;
+
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	float Lean; 
+
+	FRotator CharacterRotationLastFrame;
+	FRotator CharacterRotation;
+	FRotator DeltaRotation;
+
+private:
+	void SetYawOffset(float DeltaTime);
+	void SetLean(float DeltaTime);
 
 };

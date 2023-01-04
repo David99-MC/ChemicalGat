@@ -35,7 +35,10 @@ public:
 private:	
 	ABlasterCharacter* BlasterCharacter;
 
-	UPROPERTY(Replicated)
+	UFUNCTION()
+	void OnRep_EquippedWeapon();
+
+	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
 
 	UPROPERTY(Replicated)

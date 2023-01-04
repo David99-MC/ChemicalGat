@@ -6,6 +6,7 @@
 #include "ChemicalGat/Weapon/Weapon.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Net/UnrealNetwork.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -48,6 +49,19 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		HandSocket->AttachActor(EquippedWeapon, BlasterCharacter->GetMesh());
 	}
 	EquippedWeapon->SetOwner(BlasterCharacter);
+	BlasterCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+	BlasterCharacter->bUseControllerRotationYaw = true;
+	// BlasterCharacter->bUseControllerRotationPitch = true;
+}
+
+void UCombatComponent::OnRep_EquippedWeapon()
+{
+	if (EquippedWeapon && BlasterCharacter)
+	{
+		BlasterCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+		BlasterCharacter->bUseControllerRotationYaw = true;
+		// BlasterCharacter->bUseControllerRotationPitch = true;
+	}
 }
 
 void UCombatComponent::SetAiming(bool bAiming)
