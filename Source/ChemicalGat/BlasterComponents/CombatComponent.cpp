@@ -52,7 +52,6 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	EquippedWeapon->SetOwner(BlasterCharacter);
 	BlasterCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 	BlasterCharacter->bUseControllerRotationYaw = true;
-	// BlasterCharacter->bUseControllerRotationPitch = true;
 }
 
 void UCombatComponent::OnRep_EquippedWeapon()
@@ -61,7 +60,6 @@ void UCombatComponent::OnRep_EquippedWeapon()
 	{
 		BlasterCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
 		BlasterCharacter->bUseControllerRotationYaw = true;
-		// BlasterCharacter->bUseControllerRotationPitch = true;
 	}
 }
 

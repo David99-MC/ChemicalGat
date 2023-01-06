@@ -24,7 +24,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	void SetAiming(bool bAiming);
+	void SetAiming(bool bAiming); 
 	
 	UFUNCTION(Server, Reliable)
 	void ServerSetAiming(bool bAiming);
@@ -34,9 +34,6 @@ public:
 
 private:	
 	ABlasterCharacter* BlasterCharacter;
-
-	UFUNCTION()
-	void OnRep_EquippedWeapon();
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
@@ -49,4 +46,8 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	float AimWalkSpeed;
+
+private:
+	UFUNCTION()
+	void OnRep_EquippedWeapon();
 };

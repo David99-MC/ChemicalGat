@@ -44,10 +44,10 @@ protected:
 	void CrouchButtonPressed(const FInputActionValue& Value);
 
 public:
-	/** Returns CameraBoom subobject **/
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE float GetAOYaw() const {return AOYaw;}
+	FORCEINLINE float GetAOPitch() const {return AOPitch;}
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool GetIsWeaponEquipped() const;
 	bool GetIsAiming() const;
@@ -85,16 +85,22 @@ private: // Variables
 
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_OverlappingWeapon)
 	AWeapon* OverlappingWeapon;
-	
-	UFUNCTION()
-	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
 	UPROPERTY(VisibleAnywhere)
 	UCombatComponent* Combat;
+
+	float AOYaw;
+	float AOPitch;
+	FRotator StartingBaseAimRotation;
 
 private: 
 	// A Remote Procedure Call (RPC) to allow the client to also pick up the weapon 
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
+
+	UFUNCTION()
+	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
+
+	void SetAimOffsets(float DeltaTime);
 
 };

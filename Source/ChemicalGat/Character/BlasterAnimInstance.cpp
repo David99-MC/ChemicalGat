@@ -21,21 +21,22 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
     if (!BlasterCharacter) 
         return;
     
-    FVector Velocity = BlasterCharacter->GetVelocity();
-    Velocity.Z = 0;
-    Speed = Velocity.Size();
-
+    Speed = BlasterCharacter->GetVelocity().Size2D();
     bIsInAir = BlasterCharacter->GetCharacterMovement()->IsFalling();
     bIsAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0 ? true : false;
+
+    bEquippedWeapon = BlasterCharacter->GetIsWeaponEquipped();
+
+    bIsCrouched = BlasterCharacter->bIsCrouched;
+    bIsAiming = BlasterCharacter->GetIsAiming();
+    
+    AOYaw = BlasterCharacter->GetAOYaw();
+    AOPitch = BlasterCharacter->GetAOPitch();  
 
     if (Speed > 3.f && bIsAccelerating)
         bShouldMove = true;
     else
         bShouldMove = false;
-
-    bEquippedWeapon = BlasterCharacter->GetIsWeaponEquipped();
-    bIsCrouched = BlasterCharacter->bIsCrouched;
-    bIsAiming = BlasterCharacter->GetIsAiming();  
 
     SetYawOffset(DeltaTime);
     SetLean(DeltaTime);

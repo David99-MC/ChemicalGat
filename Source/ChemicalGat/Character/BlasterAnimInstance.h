@@ -49,7 +49,13 @@ private:
 	float YawOffset;
 
 	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
-	float Lean; 
+	float Lean;
+
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	float AOYaw;
+
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	float AOPitch; 
 
 	FRotator CharacterRotationLastFrame;
 	FRotator CharacterRotation;

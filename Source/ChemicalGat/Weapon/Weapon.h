@@ -41,8 +41,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-	UStaticMeshComponent* WeaponMagMesh;
+	// UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	// UStaticMeshComponent* WeaponMagMesh;
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USphereComponent* AreaSphere;

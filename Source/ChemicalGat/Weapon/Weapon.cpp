@@ -22,11 +22,11 @@ AWeapon::AWeapon()
 	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	WeaponMagMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mag Mesh"));
-	WeaponMagMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("Mag_Socket"));
-	WeaponMagMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	WeaponMagMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
-	WeaponMagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// WeaponMagMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mag Mesh"));
+	// WeaponMagMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("Mag_Socket"));
+	// WeaponMagMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	// WeaponMagMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	// WeaponMagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Area Sphere"));
 	AreaSphere->SetupAttachment(RootComponent);

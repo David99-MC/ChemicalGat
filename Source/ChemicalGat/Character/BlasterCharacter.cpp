@@ -13,6 +13,7 @@
 #include "ChemicalGat/Weapon/Weapon.h"
 #include "ChemicalGat/BlasterComponents/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -81,6 +82,7 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	SetAimOffsets(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -229,4 +231,38 @@ bool ABlasterCharacter::GetIsWeaponEquipped() const
 bool ABlasterCharacter::GetIsAiming() const
 {
 	return (Combat && Combat->bIsAiming); 
+}
+
+void ABlasterCharacter::SetAimOffsets(float DeltaTime)
+{
+	if (!GetIsWeaponEquipped())
+		return;
+	FVector Velocity = GetVelocity();
+	float Speed = Velocity.Size2D();
+	bool bIsInAir = GetCharacterMovement()->IsFalling();
+
+	if (Speed <= .1f && !bIsInAir) // standing still and not jumping
+	{
+		if (GetIsWeaponEquipped())
+		{
+			bUseControllerRotationYaw = false;
+			FRotator CurrentBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
+			FRotator DeltaBaseAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentBaseAimRotation, StartingBaseAimRotation);
+			AOYaw = DeltaBaseAimRotation.Yaw;
+		}
+	}
+	if (Speed > 0.f || bIsInAir)
+	{
+		bUseControllerRotationYaw = true;
+		StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
+		AOYaw = 0;
+	}
+	AOPitch = GetBaseAimRotation().Pitch;
+	if (AOPitch > 90.f && !IsLocallyControlled())
+	{
+		// Map AOPitch from [270, 360) to [-90, 0), taking the result when decompressing over the Internet
+		FVector2D InRange(270.f, 360.f);
+		FVector2D OutRange(-90.f, 0.f);
+		AOPitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AOPitch);
+	}
 }
