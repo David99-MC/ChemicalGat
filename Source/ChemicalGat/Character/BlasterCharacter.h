@@ -46,18 +46,17 @@ protected:
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-	FORCEINLINE float GetAOYaw() const {return AOYaw;}
-	FORCEINLINE float GetAOPitch() const {return AOPitch;}
-	void SetOverlappingWeapon(AWeapon* Weapon);
+	FORCEINLINE float GetAOYaw() const { return AOYaw; }
+	FORCEINLINE float GetAOPitch() const { return AOPitch; }
+	AWeapon* GetEquippedWeapon() const;
 	bool GetIsWeaponEquipped() const;
 	bool GetIsAiming() const;
 
+	void SetOverlappingWeapon(AWeapon* Weapon);
 private: // Variables
-	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
 
-	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
@@ -90,7 +89,9 @@ private: // Variables
 	UCombatComponent* Combat;
 
 	float AOYaw;
+
 	float AOPitch;
+
 	FRotator StartingBaseAimRotation;
 
 private: 

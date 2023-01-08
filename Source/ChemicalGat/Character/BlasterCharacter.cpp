@@ -266,3 +266,10 @@ void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 		AOPitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AOPitch);
 	}
 }
+
+AWeapon* ABlasterCharacter::GetEquippedWeapon() const
+{
+	if (Combat == nullptr) 
+		return nullptr;
+	return Combat->EquippedWeapon;
+}

@@ -10,6 +10,7 @@
  * Forward Declarations 
  */
 class ABlasterCharacter;
+class AWeapon;
 
 UCLASS()
 class CHEMICALGAT_API UBlasterAnimInstance : public UAnimInstance
@@ -34,7 +35,7 @@ private:
 	bool bShouldMove;
 
 	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
-	bool bEquippedWeapon;
+	bool bIsWeaponEquipped;
 
 	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	bool bIsCrouched;
@@ -57,12 +58,23 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	float AOPitch; 
 
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	FTransform LeftHandTransform;
+
 	FRotator CharacterRotationLastFrame;
+	
 	FRotator CharacterRotation;
+	
 	FRotator DeltaRotation;
 
+	AWeapon* EquippedWeapon;
+	
 private:
 	void SetYawOffset(float DeltaTime);
 	void SetLean(float DeltaTime);
+	void UpdateLocomotion();
+	void UpdateCombat();
+	void UpdateWeapon();
+	void AttachLeftHandToWeapon();
 
 };
