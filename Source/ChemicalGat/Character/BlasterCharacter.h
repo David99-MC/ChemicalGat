@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-
+#include "ChemicalGat/BlasterTypes/TurningInPlace.h"
 #include "BlasterCharacter.generated.h"
 
 /** Forward Declarations */
@@ -48,6 +48,7 @@ public:
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE float GetAOYaw() const { return AOYaw; }
 	FORCEINLINE float GetAOPitch() const { return AOPitch; }
+	FORCEINLINE ETurnInPlace GetTurnInPlace() const { return TurnInPlace; }
 	AWeapon* GetEquippedWeapon() const;
 	bool GetIsWeaponEquipped() const;
 	bool GetIsAiming() const;
@@ -94,6 +95,8 @@ private: // Variables
 
 	FRotator StartingBaseAimRotation;
 
+	ETurnInPlace TurnInPlace;
+
 private: 
 	// A Remote Procedure Call (RPC) to allow the client to also pick up the weapon 
 	UFUNCTION(Server, Reliable)
@@ -103,5 +106,7 @@ private:
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
 	void SetAimOffsets(float DeltaTime);
+
+	void SetTurnInPlace(float DeltaTime);
 
 };

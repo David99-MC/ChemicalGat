@@ -57,6 +57,8 @@ ABlasterCharacter::ABlasterCharacter()
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	TurnInPlace = ETurnInPlace::ETIP_NotTurning;
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -236,7 +238,10 @@ bool ABlasterCharacter::GetIsAiming() const
 void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 {
 	if (!GetIsWeaponEquipped())
+	{
+		StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
 		return;
+	}
 	FVector Velocity = GetVelocity();
 	float Speed = Velocity.Size2D();
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
@@ -245,18 +250,22 @@ void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 	{
 		if (GetIsWeaponEquipped())
 		{
-			bUseControllerRotationYaw = false;
+			bUseControllerRotationYaw = true;
 			FRotator CurrentBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
 			FRotator DeltaBaseAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentBaseAimRotation, StartingBaseAimRotation);
 			AOYaw = DeltaBaseAimRotation.Yaw;
+			SetTurnInPlace(DeltaTime);
 		}
 	}
+
 	if (Speed > 0.f || bIsInAir)
 	{
 		bUseControllerRotationYaw = true;
 		StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
 		AOYaw = 0;
+		TurnInPlace = ETurnInPlace::ETIP_NotTurning;
 	}
+
 	AOPitch = GetBaseAimRotation().Pitch;
 	if (AOPitch > 90.f && !IsLocallyControlled())
 	{
@@ -264,6 +273,19 @@ void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 		FVector2D InRange(270.f, 360.f);
 		FVector2D OutRange(-90.f, 0.f);
 		AOPitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AOPitch);
+	}
+}
+
+void ABlasterCharacter::SetTurnInPlace(float DeltaTime)
+{
+	// UE_LOG(LogTemp, Warning, TEXT("AO_Yaw: %f"), AOYaw);
+	if (AOYaw > 90.f)
+	{
+		TurnInPlace = ETurnInPlace::ETIP_Right;
+	}
+	else if (AOYaw < -90.f)
+	{
+		TurnInPlace = ETurnInPlace::ETIP_Left;
 	}
 }
 

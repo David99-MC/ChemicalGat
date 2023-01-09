@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "ChemicalGat/BlasterTypes/TurningInPlace.h"
 #include "BlasterAnimInstance.generated.h"
 
 /**
@@ -60,6 +61,9 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	FTransform LeftHandTransform;
+	
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	ETurnInPlace TurnInPlace;
 
 	FRotator CharacterRotationLastFrame;
 	

@@ -49,6 +49,8 @@ void UBlasterAnimInstance::UpdateCombat()
     
     AOYaw = BlasterCharacter->GetAOYaw();
     AOPitch = BlasterCharacter->GetAOPitch();
+
+    TurnInPlace = BlasterCharacter->GetTurnInPlace();
 }
 
 void UBlasterAnimInstance::UpdateWeapon()
@@ -58,9 +60,9 @@ void UBlasterAnimInstance::UpdateWeapon()
 }
 
 /**
- * Transform the LeftHandSocket into bone space for one of the bones on the Character's mesh
- * We want the socket location on the weapon relative to the right hand
- * => Because the weapon should NOT be adjusted or moved relative to the right hand at runtime during the game
+ * Transform the LeftHandSocket into Hand_R bone space
+ * => We want the socket location on the weapon relative to the right hand...
+ * ... Because the weapon should NOT be adjusted or moved relative to the right hand at runtime during the game
 */
 void UBlasterAnimInstance::AttachLeftHandToWeapon()
 {
@@ -72,8 +74,7 @@ void UBlasterAnimInstance::AttachLeftHandToWeapon()
                                                         FRotator::ZeroRotator,           // InRotation
                                                         OutLocation, 
                                                         OutRotation );
-    // After calling the function, OutLocation and OutRotation will have the correct data of the LeftHandSocket on the weapon
-    // transformed to Hand_R bone space, ready to be used to set the new location and rotation on the LeftHandSocket
+    // OutLocation and OutRotation are the data of the LeftHandSocket transformed to Hand_R bone space
     LeftHandTransform.SetLocation(OutLocation);
     LeftHandTransform.SetRotation(FQuat(OutRotation));
 }
