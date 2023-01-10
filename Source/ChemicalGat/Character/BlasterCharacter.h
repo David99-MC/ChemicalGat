@@ -89,8 +89,13 @@ private: // Variables
 	UPROPERTY(VisibleAnywhere)
 	UCombatComponent* Combat;
 
+	/** 
+	 * @param AOYaw: used to set Yaw Value of the Blendspace
+	 * @param AOPitch: Used to set Lean Value of the Blendspace
+	 * @param InterpAOYaw: Used to reset the AOYaw to 0 for turning in place  
+	*/
 	float AOYaw;
-
+	float InterpAOYaw;
 	float AOPitch;
 
 	FRotator StartingBaseAimRotation;

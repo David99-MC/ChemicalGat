@@ -248,17 +248,18 @@ void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 
 	if (Speed <= .1f && !bIsInAir) // standing still and not jumping
 	{
-		if (GetIsWeaponEquipped())
+		FRotator CurrentBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
+		FRotator DeltaBaseAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentBaseAimRotation, StartingBaseAimRotation);
+		AOYaw = DeltaBaseAimRotation.Yaw;
+		if (TurnInPlace == ETurnInPlace::ETIP_NotTurning)
 		{
-			bUseControllerRotationYaw = true;
-			FRotator CurrentBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
-			FRotator DeltaBaseAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentBaseAimRotation, StartingBaseAimRotation);
-			AOYaw = DeltaBaseAimRotation.Yaw;
-			SetTurnInPlace(DeltaTime);
+			InterpAOYaw = AOYaw;
 		}
+		bUseControllerRotationYaw = true;
+		SetTurnInPlace(DeltaTime);
 	}
 
-	if (Speed > 0.f || bIsInAir)
+	if (Speed > 0.f || bIsInAir) // running or jumping
 	{
 		bUseControllerRotationYaw = true;
 		StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
@@ -286,6 +287,16 @@ void ABlasterCharacter::SetTurnInPlace(float DeltaTime)
 	else if (AOYaw < -90.f)
 	{
 		TurnInPlace = ETurnInPlace::ETIP_Left;
+	}
+	if (TurnInPlace != ETurnInPlace::ETIP_NotTurning)
+	{
+		InterpAOYaw = FMath::FInterpTo(InterpAOYaw, 0.f, DeltaTime, 5.f);
+		AOYaw = InterpAOYaw;
+		if (FMath::Abs(AOYaw) < 15.f) // Using Abs() for both directions
+		{
+			TurnInPlace = ETurnInPlace::ETIP_NotTurning;
+			StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
+		}
 	}
 }
 
