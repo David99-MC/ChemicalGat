@@ -5,11 +5,15 @@
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/WidgetComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "ChemicalGat/Weapon/Weapon.h"
+#include "ChemicalGat/BlasterComponents/CombatComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -25,11 +29,11 @@ ABlasterCharacter::ABlasterCharacter()
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 700.f;
+	GetCharacterMovement()->JumpZVelocity = 800.f;
 	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
-	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
+	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->GravityScale = 3.f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -44,6 +48,27 @@ ABlasterCharacter::ABlasterCharacter()
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Overhead Widget"));
 	OverheadWidget->SetupAttachment(RootComponent);
+
+	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("Combat Component"));
+	Combat->SetIsReplicated(true);
+
+	// Enabling the Character to crouch. Can also tick the box in the Character blueprint
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	TurnInPlace = ETurnInPlace::ETIP_NotTurning;
+
+	NetUpdateFrequency = 66.f;
+	MinNetUpdateFrequency = 33.f;
+}
+
+void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 }
 
 // Called when the game starts or when spawned
@@ -58,12 +83,11 @@ void ABlasterCharacter::BeginPlay()
 		}
 	}
 }
-
 // Called every frame
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	SetAimOffsets(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -73,16 +97,28 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Move);
-		
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Move);
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Look);
+		// Equipping
+		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Equip);
+		// Aiming
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Aim);
+		// Crouching
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::CrouchButtonPressed);
 	}
-	
+}
+
+void ABlasterCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (Combat)
+	{
+		Combat->BlasterCharacter = this;
+	}
 }
 
 void ABlasterCharacter::Move(const FInputActionValue& Value)
@@ -119,3 +155,170 @@ void ABlasterCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void ABlasterCharacter::Equip(const FInputActionValue& Value)
+{
+	// input is a bool
+	bool bCanEquip = Value.Get<bool>();
+	if (bCanEquip && Combat)
+	{
+		if (HasAuthority())
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
+		else // function being called from the client instead
+		{
+			ServerEquipButtonPressed();
+		}
+	}
+}
+
+void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
+{
+	if (Combat)
+	{
+		Combat->EquipWeapon(OverlappingWeapon);
+	}
+}
+
+void ABlasterCharacter::Jump()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Super::Jump();
+	}
+}
+
+void ABlasterCharacter::Aim(const FInputActionValue& Value)
+{
+	if (Combat)
+		Combat->SetAiming(Value.Get<bool>());	
+}
+
+void ABlasterCharacter::CrouchButtonPressed(const FInputActionValue& Value)
+{
+	// Calling the Crouch/UnCrouch functions from the Character parent class
+	if (bIsCrouched)
+		UnCrouch();
+	else
+		Crouch();
+}
+
+void ABlasterCharacter::SetOverlappingWeapon(AWeapon* CurrentWeapon)
+{
+	// OverlappingWeapon can be considered as *LastWeapon before getting new value from CurrentWeapon
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(false);
+		}
+	}
+	OverlappingWeapon = CurrentWeapon;
+	if (IsLocallyControlled())
+	{
+		if (OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(true);
+		}
+	}
+}
+
+void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+{
+	if (LastWeapon)
+	{
+		LastWeapon->ShowPickupWidget(false);
+	}
+
+	if (OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+}
+
+bool ABlasterCharacter::GetIsWeaponEquipped() const
+{ 
+	return (Combat && Combat->EquippedWeapon);
+}
+
+bool ABlasterCharacter::GetIsAiming() const
+{
+	return (Combat && Combat->bIsAiming); 
+}
+
+void ABlasterCharacter::SetAimOffsets(float DeltaTime)
+{
+	if (!GetIsWeaponEquipped())
+	{
+		StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
+		return;
+	}
+	FVector Velocity = GetVelocity();
+	float Speed = Velocity.Size2D();
+	bool bIsInAir = GetCharacterMovement()->IsFalling();
+
+	if (Speed < 0.1f && !bIsInAir) // standing still and not jumping
+	{
+		FRotator CurrentBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
+		FRotator DeltaBaseAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentBaseAimRotation, StartingBaseAimRotation);
+		AOYaw = DeltaBaseAimRotation.Yaw;
+		if (TurnInPlace == ETurnInPlace::ETIP_NotTurning)
+		{
+			InterpAOYaw = AOYaw;
+		}
+		bUseControllerRotationYaw = true;
+		SetTurnInPlace(DeltaTime);
+	}
+
+	if (Speed > 0.f || bIsInAir) // running or jumping
+	{
+		bUseControllerRotationYaw = true;
+		StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
+		AOYaw = 0;
+		TurnInPlace = ETurnInPlace::ETIP_NotTurning;
+	}
+
+	AOPitch = GetBaseAimRotation().Pitch;
+	if (AOPitch > 90.f && !IsLocallyControlled())
+	{
+		// Map AOPitch from [270, 360) to [-90, 0), taking the result when decompressing over the Internet
+		FVector2D InRange(270.f, 360.f);
+		FVector2D OutRange(-90.f, 0.f);
+		AOPitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AOPitch);
+	}
+}
+
+void ABlasterCharacter::SetTurnInPlace(float DeltaTime)
+{
+	if (AOYaw > 90.f)
+	{
+		TurnInPlace = ETurnInPlace::ETIP_Right;
+	}
+	else if (AOYaw < -90.f)
+	{
+		TurnInPlace = ETurnInPlace::ETIP_Left;
+	}
+
+	/** Turn in place code, interpolating the AOYaw down to Zero which will rotate the root bone back to facing forward */
+	if (TurnInPlace != ETurnInPlace::ETIP_NotTurning)
+	{
+		InterpAOYaw = FMath::FInterpTo(InterpAOYaw, 0.f, DeltaTime, 5.f);
+		AOYaw = InterpAOYaw;
+		if (FMath::Abs(AOYaw) < 15.f) // Using Abs() for both directions
+		{
+			TurnInPlace = ETurnInPlace::ETIP_NotTurning;
+			StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
+		}
+	}
+}
+
+AWeapon* ABlasterCharacter::GetEquippedWeapon() const
+{
+	if (Combat == nullptr) 
+		return nullptr;
+	return Combat->EquippedWeapon;
+}
