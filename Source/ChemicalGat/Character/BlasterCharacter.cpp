@@ -59,6 +59,9 @@ ABlasterCharacter::ABlasterCharacter()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
 	TurnInPlace = ETurnInPlace::ETIP_NotTurning;
+
+	NetUpdateFrequency = 66.f;
+	MinNetUpdateFrequency = 33.f;
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -94,7 +97,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Move);
@@ -177,6 +180,18 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 	}
 }
 
+void ABlasterCharacter::Jump()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Super::Jump();
+	}
+}
+
 void ABlasterCharacter::Aim(const FInputActionValue& Value)
 {
 	if (Combat)
@@ -246,7 +261,7 @@ void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 	float Speed = Velocity.Size2D();
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
 
-	if (Speed <= .1f && !bIsInAir) // standing still and not jumping
+	if (Speed < 0.1f && !bIsInAir) // standing still and not jumping
 	{
 		FRotator CurrentBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
 		FRotator DeltaBaseAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentBaseAimRotation, StartingBaseAimRotation);
@@ -279,7 +294,6 @@ void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 
 void ABlasterCharacter::SetTurnInPlace(float DeltaTime)
 {
-	// UE_LOG(LogTemp, Warning, TEXT("AO_Yaw: %f"), AOYaw);
 	if (AOYaw > 90.f)
 	{
 		TurnInPlace = ETurnInPlace::ETIP_Right;
@@ -288,6 +302,8 @@ void ABlasterCharacter::SetTurnInPlace(float DeltaTime)
 	{
 		TurnInPlace = ETurnInPlace::ETIP_Left;
 	}
+
+	/** Turn in place code, interpolating the AOYaw down to Zero which will rotate the root bone back to facing forward */
 	if (TurnInPlace != ETurnInPlace::ETIP_NotTurning)
 	{
 		InterpAOYaw = FMath::FInterpTo(InterpAOYaw, 0.f, DeltaTime, 5.f);

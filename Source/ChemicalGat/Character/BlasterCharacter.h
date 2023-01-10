@@ -32,16 +32,18 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	/** Called for movement input */
+	/** Bind to movement input */
 	void Move(const FInputActionValue& Value);
-	/** Called for looking input */
+	/** Bind to looking input */
 	void Look(const FInputActionValue& Value);
-	/** Called for Equipping input */
+	/** Bind to Equipping input */
 	void Equip(const FInputActionValue& Value);
-	/** Called for Aiming input */
+	/** Bind to Aiming input */
 	void Aim(const FInputActionValue& Value);
-	/** Called for Crouching input */
+	/** Bind to Crouching input */
 	void CrouchButtonPressed(const FInputActionValue& Value);
+	
+	virtual void Jump() override;
 
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
@@ -91,8 +93,8 @@ private: // Variables
 
 	/** 
 	 * @param AOYaw: used to set Yaw Value of the Blendspace
-	 * @param AOPitch: Used to set Lean Value of the Blendspace
 	 * @param InterpAOYaw: Used to reset the AOYaw to 0 for turning in place  
+	 * @param AOPitch: Used to set Lean Value of the Blendspace
 	*/
 	float AOYaw;
 	float InterpAOYaw;
