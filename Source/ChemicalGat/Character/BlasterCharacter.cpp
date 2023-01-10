@@ -182,7 +182,7 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 
 void ABlasterCharacter::Jump()
 {
-	if (bIsCrouched)
+	if (bIsCrouched) // Uncrouch when jumping while crouching
 	{
 		UnCrouch();
 	}
