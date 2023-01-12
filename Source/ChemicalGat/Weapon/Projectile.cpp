@@ -2,13 +2,20 @@
 
 
 #include "Projectile.h"
-
+#include "Components/BoxComponent.h"
 // Sets default values
 AProjectile::AProjectile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	HitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Hit Box"));
+	SetRootComponent(HitBox);
+	HitBox->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	HitBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	HitBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	HitBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 }
 
 // Called when the game starts or when spawned

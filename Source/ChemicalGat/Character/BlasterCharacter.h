@@ -40,9 +40,12 @@ protected:
 	void Equip(const FInputActionValue& Value);
 	/** Bind to Aiming input */
 	void Aim(const FInputActionValue& Value);
+	/** Bind to Shooting input */
+	void Shoot(const FInputActionValue& Value);
+	
 	/** Bind to Crouching input */
 	void CrouchButtonPressed(const FInputActionValue& Value);
-	
+
 	virtual void Jump() override;
 
 public:
@@ -80,6 +83,8 @@ private: // Variables
 	UInputAction* CrouchAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* AimAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ShootAction;
 	/** ---------------------------------------------- */
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))

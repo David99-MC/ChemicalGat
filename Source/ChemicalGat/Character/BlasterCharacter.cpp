@@ -107,6 +107,8 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Equip);
 		// Aiming
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Aim);
+		// Shooting
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Shoot);
 		// Crouching
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::CrouchButtonPressed);
 	}
@@ -196,6 +198,11 @@ void ABlasterCharacter::Aim(const FInputActionValue& Value)
 {
 	if (Combat)
 		Combat->SetAiming(Value.Get<bool>());	
+}
+
+void ABlasterCharacter::Shoot(const FInputActionValue& Value)
+{
+	
 }
 
 void ABlasterCharacter::CrouchButtonPressed(const FInputActionValue& Value)
