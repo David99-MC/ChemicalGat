@@ -13,5 +13,7 @@ UCLASS()
 class CHEMICALGAT_API AProjectileWeapon : public AWeapon
 {
 	GENERATED_BODY()
-	
+
+protected:
+	virtual void Fire(const FVector& HitTarget) override;
 };

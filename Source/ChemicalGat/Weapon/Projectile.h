@@ -7,6 +7,10 @@
 #include "Projectile.generated.h"
 
 class UBoxComponent;
+class UProjectileMovementComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
+
 UCLASS()
 class CHEMICALGAT_API AProjectile : public AActor
 {
@@ -20,7 +24,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-private:	
+private:
+	UPROPERTY(VisibleAnywhere)	
 	UBoxComponent* HitBox;
 
+	UPROPERTY(VisibleAnywhere)
+	UProjectileMovementComponent* ProjectileMovementComponent;
+
+	UPROPERTY(EditAnywhere, Category = VFX)
+	UNiagaraComponent* BulletTrail;	
 };

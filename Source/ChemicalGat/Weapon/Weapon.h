@@ -9,6 +9,7 @@
 class USphereComponent;
 class UWidgetComponent;
 class UAnimationAsset;
+class AProjectile;
 
 UENUM(BlueprintType) // Enable this enum class in the blueprint
 enum class EWeaponState : uint8
@@ -39,23 +40,27 @@ protected:
 	virtual void BeginPlay() override;
 	
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(VisibleAnywhere, Category = WeaponProperties)
 	USkeletalMeshComponent* WeaponMesh;
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(VisibleAnywhere, Category = WeaponProperties)
 	USphereComponent* AreaSphere;
 
-	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_WeaponState, Category = "Weapon Properties")
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_WeaponState, Category = WeaponProperties)
 	EWeaponState WeaponState;
 
 	UFUNCTION()
 	void OnRep_WeaponState();
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(VisibleAnywhere, Category = WeaponProperties)
 	UWidgetComponent* PickupWidget;
 
-	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UPROPERTY(EditAnywhere, Category = WeaponProperties)
 	UAnimationAsset* FireAnimation;	
+
+protected:
+	UPROPERTY(EditAnywhere, Category = WeaponProperties)
+	TSubclassOf<AProjectile> ProjectileClass;
 
 protected:
 	UFUNCTION()
@@ -68,6 +73,6 @@ public:
 	void ShowPickupWidget(bool bShowWidget);
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
-	void Fire();
+	virtual void Fire(const FVector& HitTarget);
 
 };

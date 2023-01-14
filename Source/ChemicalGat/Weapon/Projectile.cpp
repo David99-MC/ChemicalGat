@@ -3,6 +3,10 @@
 
 #include "Projectile.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
+
 // Sets default values
 AProjectile::AProjectile()
 {
@@ -16,6 +20,12 @@ AProjectile::AProjectile()
 	HitBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	HitBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	HitBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+
+	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
+	ProjectileMovementComponent->bRotationFollowsVelocity = true;
+
+	BulletTrail = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Bullet trail"));
+	BulletTrail->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned

@@ -6,8 +6,11 @@
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
+#define TRACE_LENGTH 80000.f
+
 class ABlasterCharacter;
 class AWeapon;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CHEMICALGAT_API UCombatComponent : public UActorComponent
 {
@@ -39,6 +42,8 @@ protected:
 	UFUNCTION(NetMulticast, reliable)
 	void MulticastFireButtonPressed();
 
+	void TraceLineUnderCrosshair(FHitResult& TraceHitResult);
+
 public:
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
@@ -58,6 +63,8 @@ private:
 	float AimWalkSpeed;
 
 	bool bIsFiring;
+
+	FVector HitTarget;
 
 private:
 	UFUNCTION()
