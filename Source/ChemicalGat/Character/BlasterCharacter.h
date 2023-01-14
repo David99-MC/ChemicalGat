@@ -16,6 +16,7 @@ class UInputAction;
 class UWidgetComponent;
 class AWeapon;
 class UCombatComponent;
+class UAnimMontage;
 
 UCLASS()
 class CHEMICALGAT_API ABlasterCharacter : public ACharacter
@@ -57,8 +58,8 @@ public:
 	AWeapon* GetEquippedWeapon() const;
 	bool GetIsWeaponEquipped() const;
 	bool GetIsAiming() const;
-
 	void SetOverlappingWeapon(AWeapon* Weapon);
+	void PlayRifleMontage(bool bIsAiming);
 private: // Variables
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
@@ -108,6 +109,9 @@ private: // Variables
 	FRotator StartingBaseAimRotation;
 
 	ETurnInPlace TurnInPlace;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* RifleMontage;
 
 private: 
 	// A Remote Procedure Call (RPC) to allow the client to also pick up the weapon 

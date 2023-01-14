@@ -29,6 +29,16 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerSetAiming(bool bAiming);
 
+	void FireButtonPressed(bool bPressed);
+	
+	// Called by the client BUT runs on server 
+	UFUNCTION(Server, reliable)
+	void ServerFireButtonPressed();
+
+	// Called by the server and runs on ALL machines
+	UFUNCTION(NetMulticast, reliable)
+	void MulticastFireButtonPressed();
+
 public:
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
@@ -46,6 +56,8 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	float AimWalkSpeed;
+
+	bool bIsFiring;
 
 private:
 	UFUNCTION()

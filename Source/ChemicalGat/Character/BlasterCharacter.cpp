@@ -14,6 +14,7 @@
 #include "ChemicalGat/BlasterComponents/CombatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Animation/AnimInstance.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -202,7 +203,8 @@ void ABlasterCharacter::Aim(const FInputActionValue& Value)
 
 void ABlasterCharacter::Shoot(const FInputActionValue& Value)
 {
-	
+	if (Combat)
+		Combat->FireButtonPressed(Value.Get<bool>());
 }
 
 void ABlasterCharacter::CrouchButtonPressed(const FInputActionValue& Value)
@@ -261,7 +263,8 @@ void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 {
 	if (!GetIsWeaponEquipped())
 	{
-		StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
+		// Update StartingBaseAimRotation even when unequipped
+		StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0); 
 		return;
 	}
 	FVector Velocity = GetVelocity();
@@ -328,4 +331,18 @@ AWeapon* ABlasterCharacter::GetEquippedWeapon() const
 	if (Combat == nullptr) 
 		return nullptr;
 	return Combat->EquippedWeapon;
+}
+
+void ABlasterCharacter::PlayRifleMontage(bool bIsAiming)
+{
+	if (!Combat || !Combat->EquippedWeapon)
+		return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && RifleMontage)
+	{
+		AnimInstance->Montage_Play(RifleMontage);
+		FName SectionName = bIsAiming ? FName("HipFire") : FName("AimFire");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
 }

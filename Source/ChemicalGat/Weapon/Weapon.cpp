@@ -6,6 +6,7 @@
 #include "Components/WidgetComponent.h"
 #include "ChemicalGat/Character/BlasterCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "Animation/AnimationAsset.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -21,12 +22,6 @@ AWeapon::AWeapon()
 	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	// WeaponMagMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mag Mesh"));
-	// WeaponMagMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("Mag_Socket"));
-	// WeaponMagMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	// WeaponMagMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
-	// WeaponMagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Area Sphere"));
 	AreaSphere->SetupAttachment(RootComponent);
@@ -120,4 +115,12 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 	if (PickupWidget)
 		PickupWidget->SetVisibility(bShowWidget);
 	
+}
+
+void AWeapon::Fire()
+{
+	if (FireAnimation)
+	{
+		WeaponMesh->PlayAnimation(FireAnimation, false);
+	}
 }

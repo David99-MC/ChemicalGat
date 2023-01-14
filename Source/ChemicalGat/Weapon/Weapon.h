@@ -8,6 +8,7 @@
 
 class USphereComponent;
 class UWidgetComponent;
+class UAnimationAsset;
 
 UENUM(BlueprintType) // Enable this enum class in the blueprint
 enum class EWeaponState : uint8
@@ -41,9 +42,6 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh;
 
-	// UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-	// UStaticMeshComponent* WeaponMagMesh;
-
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	USphereComponent* AreaSphere;
 
@@ -54,7 +52,10 @@ private:
 	void OnRep_WeaponState();
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-	UWidgetComponent* PickupWidget;	
+	UWidgetComponent* PickupWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UAnimationAsset* FireAnimation;	
 
 protected:
 	UFUNCTION()
@@ -67,5 +68,6 @@ public:
 	void ShowPickupWidget(bool bShowWidget);
 	void SetWeaponState(EWeaponState State);
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
+	void Fire();
 
 };

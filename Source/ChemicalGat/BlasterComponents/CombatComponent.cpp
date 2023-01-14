@@ -76,3 +76,25 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bAiming)
 	BlasterCharacter->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
 }
 
+void UCombatComponent::FireButtonPressed(bool bPressed)
+{
+	bIsFiring = bPressed;
+	if (bIsFiring)
+	{
+		ServerFireButtonPressed();
+	}
+}
+
+void UCombatComponent::ServerFireButtonPressed_Implementation()
+{
+	MulticastFireButtonPressed();
+}
+
+void UCombatComponent::MulticastFireButtonPressed_Implementation()
+{
+	if (BlasterCharacter && EquippedWeapon)
+	{
+		BlasterCharacter->PlayRifleMontage(bIsAiming);
+		EquippedWeapon->Fire();
+	}
+}
