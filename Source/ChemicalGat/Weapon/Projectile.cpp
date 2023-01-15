@@ -6,12 +6,15 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 AProjectile::AProjectile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	bReplicates = true;
 
 	HitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Hit Box"));
 	SetRootComponent(HitBox);
@@ -23,15 +26,23 @@ AProjectile::AProjectile()
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
-
-	BulletTrail = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Bullet trail"));
-	BulletTrail->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+	if (BulletTrail)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAttached(
+			BulletTrail,
+			HitBox,
+			FName(),
+			GetActorLocation(),
+			GetActorRotation(),
+			EAttachLocation::KeepWorldPosition,
+			true);
+	}
 	
 }
 

@@ -32,5 +32,8 @@ private:
 	UProjectileMovementComponent* ProjectileMovementComponent;
 
 	UPROPERTY(EditAnywhere, Category = VFX)
-	UNiagaraComponent* BulletTrail;	
+	UNiagaraSystem* BulletTrail;
+
+	UNiagaraComponent* BulletTrailComponent;
+	
 };
