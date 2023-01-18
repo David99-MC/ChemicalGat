@@ -36,11 +36,11 @@ protected:
 	
 	// Called by the client BUT runs on server 
 	UFUNCTION(Server, reliable)
-	void ServerFireButtonPressed();
+	void ServerFireButtonPressed(const FVector_NetQuantize& TraceHitTarget);
 
 	// Called by the server and runs on ALL machines
 	UFUNCTION(NetMulticast, reliable)
-	void MulticastFireButtonPressed();
+	void MulticastFireButtonPressed(const FVector_NetQuantize& TraceHitTarget);
 
 	void TraceLineUnderCrosshair(FHitResult& TraceHitResult);
 
@@ -63,8 +63,6 @@ private:
 	float AimWalkSpeed;
 
 	bool bIsFiring;
-
-	FVector HitTarget;
 
 private:
 	UFUNCTION()

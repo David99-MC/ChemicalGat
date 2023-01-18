@@ -7,6 +7,8 @@
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -43,7 +45,10 @@ void AProjectile::BeginPlay()
 			EAttachLocation::KeepWorldPosition,
 			true);
 	}
-	
+	if (HasAuthority())
+	{
+		HitBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	}
 }
 
 // Called every frame
@@ -53,3 +58,19 @@ void AProjectile::Tick(float DeltaTime)
 
 }
 
+void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Destroy();
+}
+
+/** The act on destroying a Replicated actor will get propagated to all clients (from document)
+ * => utilize this to avoid using RPCs 
+ * */
+void AProjectile::Destroyed()
+{
+	if (ImpactParticle && ImpactSound)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactParticle, GetActorLocation(), GetActorRotation());
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+	}
+}

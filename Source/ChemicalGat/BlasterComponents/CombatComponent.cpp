@@ -29,20 +29,18 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
 	DOREPLIFETIME(UCombatComponent, bIsAiming);
-	DOREPLIFETIME(UCombatComponent, HitTarget);
 }
 
 // Called every frame
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	FHitResult HitResult;
-	TraceLineUnderCrosshair(HitResult);
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (!BlasterCharacter || !WeaponToEquip) return;
+
 	EquippedWeapon = WeaponToEquip;
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 
@@ -84,21 +82,23 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	bIsFiring = bPressed;
 	if (bIsFiring)
 	{
-		ServerFireButtonPressed();
+		FHitResult HitResult;
+		TraceLineUnderCrosshair(HitResult); // filling in the HitResult information
+		ServerFireButtonPressed(HitResult.ImpactPoint);
 	}
 }
 
-void UCombatComponent::ServerFireButtonPressed_Implementation()
+void UCombatComponent::ServerFireButtonPressed_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
-	MulticastFireButtonPressed();
+	MulticastFireButtonPressed(TraceHitTarget);
 }
 
-void UCombatComponent::MulticastFireButtonPressed_Implementation()
+void UCombatComponent::MulticastFireButtonPressed_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (BlasterCharacter && EquippedWeapon)
 	{
 		BlasterCharacter->PlayRifleMontage(bIsAiming);
-		EquippedWeapon->Fire(HitTarget);
+		EquippedWeapon->Fire(TraceHitTarget);
 	}
 }
 
@@ -126,23 +126,14 @@ void UCombatComponent::TraceLineUnderCrosshair(FHitResult& TraceHitResult)
 	{
 		FVector Start = CrosshairWorldLocation;
 		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
+
+		// Perform Line tracing to the middle of the screen
 		GetWorld()->LineTraceSingleByChannel(
 			TraceHitResult,
 			Start,
 			End,
 			ECollisionChannel::ECC_Visibility
 		);
-		
-		// Check if it hits anything
-		if (!TraceHitResult.bBlockingHit)
-		{
-			TraceHitResult.ImpactPoint = End;
-		}
-		else
-		{
-			DrawDebugSphere(GetWorld(), TraceHitResult.ImpactPoint, 12.f, 12, FColor::Red);
-		}
-		HitTarget = TraceHitResult.ImpactPoint;
 	}
 	
 }
