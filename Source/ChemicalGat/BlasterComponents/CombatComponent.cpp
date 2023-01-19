@@ -8,6 +8,8 @@
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "ChemicalGat/PlayerController/BlasterPlayerController.h"
+#include "ChemicalGat/HUD/BlasterHUD.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -35,6 +37,39 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	SetHUDCrosshairs(DeltaTime);
+}
+
+void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
+{
+	if (BlasterCharacter == nullptr || BlasterCharacter->Controller) return;
+
+	BlasterController = BlasterController == nullptr ? Cast<ABlasterPlayerController>(BlasterCharacter->Controller) : BlasterController;
+	if (BlasterController)
+	{
+		BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(BlasterController->GetHUD()) : BlasterHUD;
+		if (BlasterHUD)
+		{
+			FHUDPackage HUDPackage;
+			if (EquippedWeapon) // Only draw the crosshair when holding a weapon
+			{
+				HUDPackage.TopCrosshair = EquippedWeapon->TopCrosshair;
+				HUDPackage.BottomCrosshair = EquippedWeapon->BottomCrosshair;
+				HUDPackage.LeftCrosshair = EquippedWeapon->LeftCrosshair;
+				HUDPackage.RightCrosshair = EquippedWeapon->RightCrosshair;
+				HUDPackage.CenterCrosshair = EquippedWeapon->CenterCrosshair;
+			}
+			else
+			{
+				HUDPackage.TopCrosshair = nullptr;
+				HUDPackage.BottomCrosshair = nullptr;
+				HUDPackage.LeftCrosshair = nullptr;
+				HUDPackage.RightCrosshair = nullptr;
+				HUDPackage.CenterCrosshair = nullptr;
+			}
+			BlasterHUD->SetHUDPackage(HUDPackage);
+		}
+	}
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)

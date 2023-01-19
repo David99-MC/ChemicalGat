@@ -10,6 +10,8 @@
 
 class ABlasterCharacter;
 class AWeapon;
+class ABlasterPlayerController;
+class ABlasterHUD;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CHEMICALGAT_API UCombatComponent : public UActorComponent
@@ -44,6 +46,8 @@ protected:
 
 	void TraceLineUnderCrosshair(FHitResult& TraceHitResult);
 
+	void SetHUDCrosshairs(float DeltaTime);
+
 public:
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
@@ -63,6 +67,10 @@ private:
 	float AimWalkSpeed;
 
 	bool bIsFiring;
+
+	ABlasterPlayerController* BlasterController;
+
+	ABlasterHUD* BlasterHUD;
 
 private:
 	UFUNCTION()
