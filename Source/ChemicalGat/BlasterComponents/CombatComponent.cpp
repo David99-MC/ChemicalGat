@@ -16,7 +16,6 @@ UCombatComponent::UCombatComponent()
 
 }
 
-// Called when the game starts
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -31,7 +30,6 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, bIsAiming);
 }
 
-// Called every frame
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
