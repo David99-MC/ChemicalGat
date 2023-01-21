@@ -66,6 +66,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	float AimWalkSpeed;
 
+	float JumpingFactor = 0.f;
+
+	UPROPERTY(EditAnywhere)
+	float JumpingFactorMax;
+
 	bool bIsFiring;
 
 	ABlasterPlayerController* BlasterController;

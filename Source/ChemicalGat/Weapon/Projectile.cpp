@@ -28,6 +28,8 @@ AProjectile::AProjectile()
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
+
+	SetLifeSpan(2.f);
 }
 
 // Called when the game starts or when spawned

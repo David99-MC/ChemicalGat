@@ -42,7 +42,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
-	if (BlasterCharacter == nullptr || BlasterCharacter->Controller) return;
+	if (BlasterCharacter == nullptr || BlasterCharacter->Controller == nullptr) return;
 
 	BlasterController = BlasterController == nullptr ? Cast<ABlasterPlayerController>(BlasterCharacter->Controller) : BlasterController;
 	if (BlasterController)
@@ -58,6 +58,26 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				HUDPackage.LeftCrosshair = EquippedWeapon->LeftCrosshair;
 				HUDPackage.RightCrosshair = EquippedWeapon->RightCrosshair;
 				HUDPackage.CenterCrosshair = EquippedWeapon->CenterCrosshair;
+
+				// Calculating the Spread based on running or jumping
+				// The idea is to map the character's velocity to the velocity multiplier range, i.e. Mapping [0, 600] -> [0, 1]
+				// Ex: Velocity.Size2D() is [0, 1] based on character's walk speed 
+				FVector2D WalkSpeedRange(0, BaseWalkSpeed);
+				FVector2D VelocityMultiplierRange(0, 1.f);
+				FVector Velocity = BlasterCharacter->GetVelocity();
+
+				float CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, Velocity.Size2D());
+				
+				if (BlasterCharacter->GetCharacterMovement()->IsFalling())
+				{
+					JumpingFactor = FMath::FInterpTo(JumpingFactor, JumpingFactorMax, DeltaTime, 2.25f);
+				}
+				else
+				{
+					JumpingFactor = FMath::FInterpTo(JumpingFactor, 0.f, DeltaTime, 30.f);
+				}
+
+				HUDPackage.CrosshairSpread = CrosshairVelocityFactor + JumpingFactor;
 			}
 			else
 			{
@@ -66,6 +86,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				HUDPackage.LeftCrosshair = nullptr;
 				HUDPackage.RightCrosshair = nullptr;
 				HUDPackage.CenterCrosshair = nullptr;
+				HUDPackage.CrosshairSpread = 0.f;
 			}
 			BlasterHUD->SetHUDPackage(HUDPackage);
 		}
@@ -169,6 +190,10 @@ void UCombatComponent::TraceLineUnderCrosshair(FHitResult& TraceHitResult)
 			End,
 			ECollisionChannel::ECC_Visibility
 		);
+		if (!TraceHitResult.bBlockingHit)
+		{
+			TraceHitResult.ImpactPoint = End; 
+		}
 	}
 	
 }

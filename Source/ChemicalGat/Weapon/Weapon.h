@@ -22,8 +22,6 @@ enum class EWeaponState : uint8
 	EWS_MAX UMETA(DisplayName = "DefaultMAX")
 };
 
-
-
 UCLASS()
 class CHEMICALGAT_API AWeapon : public AActor
 {
@@ -45,6 +43,10 @@ public:
 	
 	virtual void Fire(const FVector& HitTarget);
 
+private:
+	UFUNCTION()
+	void OnRep_WeaponState();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -54,22 +56,6 @@ protected:
 	UFUNCTION()
 	virtual void OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
-private:
-	UPROPERTY(VisibleAnywhere, Category = WeaponProperties)
-	USkeletalMeshComponent* WeaponMesh;
-
-	UPROPERTY(VisibleAnywhere, Category = WeaponProperties)
-	USphereComponent* AreaSphere;
-
-	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_WeaponState, Category = WeaponProperties)
-	EWeaponState WeaponState;
-
-	UPROPERTY(VisibleAnywhere, Category = WeaponProperties)
-	UWidgetComponent* PickupWidget;
-
-	UPROPERTY(EditAnywhere, Category = WeaponProperties)
-	UAnimationAsset* FireAnimation;	
-
 public:
 	UPROPERTY(EditAnywhere, Category = Crosshair)
 	UTexture2D* CenterCrosshair;
@@ -87,8 +73,20 @@ public:
 	UTexture2D* RightCrosshair;
 
 private:
-	UFUNCTION()
-	void OnRep_WeaponState();
+	UPROPERTY(VisibleAnywhere, Category = WeaponProperties)
+	USkeletalMeshComponent* WeaponMesh;
+
+	UPROPERTY(VisibleAnywhere, Category = WeaponProperties)
+	USphereComponent* AreaSphere;
+
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_WeaponState, Category = WeaponProperties)
+	EWeaponState WeaponState;
+
+	UPROPERTY(VisibleAnywhere, Category = WeaponProperties)
+	UWidgetComponent* PickupWidget;
+
+	UPROPERTY(EditAnywhere, Category = WeaponProperties)
+	UAnimationAsset* FireAnimation;	
 
 protected:
 	UPROPERTY(EditAnywhere, Category = WeaponProperties)
