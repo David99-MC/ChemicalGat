@@ -31,6 +31,19 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 
+	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE float GetAOYaw() const { return AOYaw; }
+	FORCEINLINE float GetAOPitch() const { return AOPitch; }
+	FORCEINLINE ETurnInPlace GetTurnInPlace() const { return TurnInPlace; }
+	
+	AWeapon* GetEquippedWeapon() const;
+	bool GetIsWeaponEquipped() const;
+	bool GetIsAiming() const;
+	void SetOverlappingWeapon(AWeapon* Weapon);
+	void PlayRifleMontage(bool bIsAiming);
+	FVector GetHitTarget() const;
+
 protected:
 	virtual void BeginPlay() override;
 	/** Bind to movement input */
@@ -48,19 +61,6 @@ protected:
 	void CrouchButtonPressed(const FInputActionValue& Value);
 
 	virtual void Jump() override;
-
-public:
-	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-	FORCEINLINE float GetAOYaw() const { return AOYaw; }
-	FORCEINLINE float GetAOPitch() const { return AOPitch; }
-	FORCEINLINE ETurnInPlace GetTurnInPlace() const { return TurnInPlace; }
-	AWeapon* GetEquippedWeapon() const;
-	bool GetIsWeaponEquipped() const;
-	bool GetIsAiming() const;
-	void SetOverlappingWeapon(AWeapon* Weapon);
-	void PlayRifleMontage(bool bIsAiming);
-	FVector GetHitTarget() const;
 
 private:
 	// A Remote Procedure Call (RPC) to allow the client to also pick up the weapon 

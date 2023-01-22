@@ -60,15 +60,15 @@ private:
 	UPROPERTY(Replicated)
 	bool bIsAiming;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Combat)
 	float BaseWalkSpeed;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Combat)
 	float AimWalkSpeed;
 
 	float JumpingFactor = 0.f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Combat)
 	float JumpingFactorMax;
 
 	bool bIsFiring;
@@ -79,7 +79,20 @@ private:
 
 	FVector HitTarget;
 
+	/**
+	 *  @param DefaultFOV default character follow camera's field of view
+	 *  @param CurrentFOV determine how much the follow camera's fov should interp to 
+	 *  NOTE: The closer to 0, the more zoomed it becomes
+	*/
+	float DefaultFOV;
+	float CurrentFOV;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float UnZoomInterpSpeed = 20.f;
+
 private:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
+
+	void InterpFOV(float DeltaTime);
 };

@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "ChemicalGat/PlayerController/BlasterPlayerController.h"
 #include "ChemicalGat/HUD/BlasterHUD.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -23,7 +24,14 @@ void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	if (BlasterCharacter)
+	{
 		BlasterCharacter->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+		if (BlasterCharacter->GetFollowCamera())
+		{
+			DefaultFOV = BlasterCharacter->GetFollowCamera()->FieldOfView;
+			CurrentFOV = DefaultFOV;
+		}
+	}
 }
 
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -37,15 +45,17 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	SetHUDCrosshairs(DeltaTime);
 
 	if (BlasterCharacter && BlasterCharacter->IsLocallyControlled())
 	{
+		SetHUDCrosshairs(DeltaTime);
+
 		FHitResult HitResult;
 		TraceLineUnderCrosshair(HitResult);
 		HitTarget = HitResult.ImpactPoint;
+
+		InterpFOV(DeltaTime);
 	}
-	
 }
 
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
@@ -99,6 +109,22 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 			BlasterHUD->SetHUDPackage(HUDPackage);
 		}
 	}
+}
+
+void UCombatComponent::InterpFOV(float DeltaTime)
+{
+	if (!BlasterCharacter->GetFollowCamera() || !EquippedWeapon) 
+		return;
+	
+	if (bIsAiming)
+	{
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomedInterpSpeed());
+	}
+	else
+	{
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, UnZoomInterpSpeed);
+	}
+	BlasterCharacter->GetFollowCamera()->SetFieldOfView(CurrentFOV);
 }
 
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)

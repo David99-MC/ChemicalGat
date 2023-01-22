@@ -32,16 +32,15 @@ public:
 	AWeapon();
 
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	void ShowPickupWidget(bool bShowWidget);
-	
 	void SetWeaponState(EWeaponState State);
+	virtual void Fire(const FVector& HitTarget);
 	
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
-	
-	virtual void Fire(const FVector& HitTarget);
+	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
+	FORCEINLINE float GetZoomedInterpSpeed() const { return ZoomedInterpSpeed; }
 
 private:
 	UFUNCTION()
@@ -87,6 +86,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = WeaponProperties)
 	UAnimationAsset* FireAnimation;	
+
+	UPROPERTY(EditAnywhere, Category = WeaponProperties)
+	float ZoomedFOV = 30.f;
+
+	UPROPERTY(EditAnywhere, Category = WeaponProperties)
+	float ZoomedInterpSpeed = 20.f;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = WeaponProperties)
