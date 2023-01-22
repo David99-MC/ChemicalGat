@@ -60,6 +60,20 @@ public:
 	bool GetIsAiming() const;
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	void PlayRifleMontage(bool bIsAiming);
+	FVector GetHitTarget() const;
+
+private:
+	// A Remote Procedure Call (RPC) to allow the client to also pick up the weapon 
+	UFUNCTION(Server, Reliable)
+	void ServerEquipButtonPressed();
+
+	UFUNCTION()
+	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
+
+	void SetAimOffsets(float DeltaTime);
+
+	void SetTurnInPlace(float DeltaTime);
+
 private: // Variables
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
@@ -98,9 +112,9 @@ private: // Variables
 	UCombatComponent* Combat;
 
 	/** 
-	 * @param AOYaw: used to set Yaw Value of the Blendspace
-	 * @param InterpAOYaw: Used to reset the AOYaw to 0 for turning in place  
-	 * @param AOPitch: Used to set Lean Value of the Blendspace
+	 * @param AOYaw used to set Yaw Value of the Blendspace
+	 * @param InterpAOYaw used to reset the AOYaw to 0 for turning in place  
+	 * @param AOPitch used to set Lean Value of the Blendspace
 	*/
 	float AOYaw;
 	float InterpAOYaw;
@@ -113,16 +127,9 @@ private: // Variables
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* RifleMontage;
 
-private: 
-	// A Remote Procedure Call (RPC) to allow the client to also pick up the weapon 
-	UFUNCTION(Server, Reliable)
-	void ServerEquipButtonPressed();
-
-	UFUNCTION()
-	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
-
-	void SetAimOffsets(float DeltaTime);
-
-	void SetTurnInPlace(float DeltaTime);
-
+	FVector HitTarget;
+	
+public:
+	UPROPERTY(EditAnywhere, Category = WeaponRotationCorrection)
+	float RightHandRotationRollOffset;
 };

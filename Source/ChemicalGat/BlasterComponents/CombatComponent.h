@@ -77,6 +77,8 @@ private:
 
 	ABlasterHUD* BlasterHUD;
 
+	FVector HitTarget;
+
 private:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();

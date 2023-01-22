@@ -346,3 +346,10 @@ void ABlasterCharacter::PlayRifleMontage(bool bIsAiming)
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
+
+FVector ABlasterCharacter::GetHitTarget() const
+{
+	if (!Combat) 
+		return FVector();
+	return Combat->HitTarget;
+}
