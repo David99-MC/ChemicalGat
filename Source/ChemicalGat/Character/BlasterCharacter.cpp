@@ -15,6 +15,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Animation/AnimInstance.h"
+#include "ChemicalGat/ChemicalGat.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -57,6 +58,7 @@ ABlasterCharacter::ABlasterCharacter()
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
@@ -251,11 +253,6 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
-bool ABlasterCharacter::GetIsWeaponEquipped() const
-{ 
-	return (Combat && Combat->EquippedWeapon);
-}
-
 bool ABlasterCharacter::GetIsAiming() const
 {
 	return (Combat && Combat->bIsAiming); 
@@ -263,7 +260,7 @@ bool ABlasterCharacter::GetIsAiming() const
 
 void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 {
-	if (!GetIsWeaponEquipped())
+	if (!GetEquippedWeapon())
 	{
 		// Update StartingBaseAimRotation even when unequipped
 		StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0); 
@@ -377,4 +374,23 @@ FVector ABlasterCharacter::GetHitTarget() const
 	if (!Combat) 
 		return FVector();
 	return Combat->HitTarget;
+}
+
+void ABlasterCharacter::PlayHitReactMontage()
+{
+	if (!GetEquippedWeapon()) 
+		return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactMontage)
+	{
+		AnimInstance->Montage_Play(HitReactMontage);
+		FName SectionName = FName("FromFront");
+		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void ABlasterCharacter::MulticastHit_Implementation()
+{
+	PlayHitReactMontage();
 }

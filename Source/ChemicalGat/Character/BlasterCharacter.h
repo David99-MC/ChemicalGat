@@ -40,11 +40,13 @@ public:
 	FORCEINLINE ETurnInPlace GetTurnInPlace() const { return TurnInPlace; }
 	
 	AWeapon* GetEquippedWeapon() const;
-	bool GetIsWeaponEquipped() const;
 	bool GetIsAiming() const;
 	void SetOverlappingWeapon(AWeapon* Weapon);
-	void PlayRifleMontage(bool bIsAiming);
 	FVector GetHitTarget() const;
+	void PlayRifleMontage(bool bIsAiming);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastHit();
 
 protected:
 	virtual void BeginPlay() override;
@@ -77,6 +79,8 @@ private:
 	void SetTurnInPlace(float DeltaTime);
 
 	void HideMeshWhenCameraIsClose();
+
+	void PlayHitReactMontage();
 
 private: // Variables
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -130,6 +134,9 @@ private: // Variables
 
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* RifleMontage;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* HitReactMontage;
 
 	FVector HitTarget;
 

@@ -71,7 +71,7 @@ void UBlasterAnimInstance::UpdateCombat()
 
 void UBlasterAnimInstance::UpdateWeapon()
 {
-    bIsWeaponEquipped = BlasterCharacter->GetIsWeaponEquipped();
+    bIsWeaponEquipped = BlasterCharacter->GetEquippedWeapon() == nullptr ? false : true;
     EquippedWeapon = BlasterCharacter->GetEquippedWeapon();
 }
 
