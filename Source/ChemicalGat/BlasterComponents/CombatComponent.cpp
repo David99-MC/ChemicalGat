@@ -9,14 +9,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "ChemicalGat/PlayerController/BlasterPlayerController.h"
-#include "ChemicalGat/HUD/BlasterHUD.h"
 #include "Camera/CameraComponent.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts
@@ -55,6 +53,7 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		HitTarget = HitResult.ImpactPoint;
 
 		InterpFOV(DeltaTime);
+
 	}
 }
 
@@ -68,7 +67,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 		BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(BlasterController->GetHUD()) : BlasterHUD;
 		if (BlasterHUD)
 		{
-			FHUDPackage HUDPackage;
+			
 			if (EquippedWeapon) // Only draw the crosshair when holding a weapon
 			{
 				HUDPackage.TopCrosshair = EquippedWeapon->TopCrosshair;
@@ -78,9 +77,9 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				HUDPackage.CenterCrosshair = EquippedWeapon->CenterCrosshair;
 
 				// Calculating the Spread based on running or jumping
-				// The idea is to map the character's velocity to the velocity multiplier range, i.e. Mapping [0, 600] -> [0, 1]
+				// Map the character's velocity to the velocity multiplier range, i.e. Mapping [0, 600] -> [0, 1]
 				// Ex: Velocity.Size2D() is [0, 1] based on character's walk speed 
-				FVector2D WalkSpeedRange(0, BaseWalkSpeed);
+				FVector2D WalkSpeedRange(0, BlasterCharacter->GetCharacterMovement()->MaxWalkSpeed);
 				FVector2D VelocityMultiplierRange(0, 1.f);
 				FVector Velocity = BlasterCharacter->GetVelocity();
 
@@ -88,14 +87,30 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				
 				if (BlasterCharacter->GetCharacterMovement()->IsFalling())
 				{
-					JumpingFactor = FMath::FInterpTo(JumpingFactor, JumpingFactorMax, DeltaTime, 2.25f);
+					CrosshairJumpFactor = FMath::FInterpTo(CrosshairJumpFactor, CrosshairJumpFactorMax, DeltaTime, 2.25f);
 				}
 				else
 				{
-					JumpingFactor = FMath::FInterpTo(JumpingFactor, 0.f, DeltaTime, 30.f);
+					CrosshairJumpFactor = FMath::FInterpTo(CrosshairJumpFactor, 0.f, DeltaTime, CrosshairShrinkFactor);
 				}
 
-				HUDPackage.CrosshairSpread = CrosshairVelocityFactor + JumpingFactor;
+				if (bIsAiming)
+				{
+					CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, 0.5f, DeltaTime, CrosshairShrinkFactor);
+				}
+				else
+				{
+					CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, 0, DeltaTime, CrosshairShrinkFactor);
+				}
+
+				CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0, DeltaTime, 2.f);
+	
+				HUDPackage.CrosshairSpread =
+					DefaultCrosshairSpread + 
+					CrosshairVelocityFactor + 
+					CrosshairJumpFactor -
+					CrosshairAimFactor +
+					CrosshairShootingFactor;
 			}
 			else
 			{
@@ -106,6 +121,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				HUDPackage.CenterCrosshair = nullptr;
 				HUDPackage.CrosshairSpread = 0.f;
 			}
+			
 			BlasterHUD->SetHUDPackage(HUDPackage);
 		}
 	}
@@ -175,6 +191,10 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 		FHitResult HitResult;
 		TraceLineUnderCrosshair(HitResult); // filling in the HitResult information
 		ServerFireButtonPressed(HitResult.ImpactPoint);
+		if (EquippedWeapon)
+		{
+			CrosshairShootingFactor = EquippedWeapon->GetCrosshairShootingFactor();
+		}
 	}
 }
 
@@ -215,6 +235,13 @@ void UCombatComponent::TraceLineUnderCrosshair(FHitResult& TraceHitResult)
 	if (bScreenToWorld)
 	{
 		FVector Start = CrosshairWorldLocation;
+		if (BlasterCharacter)
+		{
+			float DistanceToCharacter = (BlasterCharacter->GetActorLocation() - Start).Size();
+			Start += CrosshairWorldDirection * (DistanceToCharacter + 50.f); 
+			// DrawDebugSphere(GetWorld(), Start, 16.f, 12, FColor::Red, false);
+		}
+
 		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
 
 		// Perform Line tracing to the middle of the screen
@@ -224,6 +251,16 @@ void UCombatComponent::TraceLineUnderCrosshair(FHitResult& TraceHitResult)
 			End,
 			ECollisionChannel::ECC_Visibility
 		);
+
+		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairInterface>())
+		{
+			HUDPackage.CrosshairColor = FLinearColor::Red;
+		}
+		else
+		{
+			HUDPackage.CrosshairColor = FLinearColor::White;
+		}
+
 		if (!TraceHitResult.bBlockingHit)
 		{
 			TraceHitResult.ImpactPoint = End; 

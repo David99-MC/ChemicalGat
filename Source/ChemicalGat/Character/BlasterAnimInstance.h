@@ -93,6 +93,6 @@ private:
 	void UpdateWeapon();
 	void AttachLeftHandToWeapon();
 
-	void RightHandRotationDebug();
+	void RotateRightHand();
 
 };

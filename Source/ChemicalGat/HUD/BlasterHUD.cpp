@@ -19,11 +19,11 @@ void ABlasterHUD::DrawHUD()
             float CrosshairScaled = HUDPackage.CrosshairSpread * CrosshairSpreadMax;
 
             // Change Y for Top and Bottom, X for Left and Right
-            DrawCrosshair(HUDPackage.CenterCrosshair, ViewportCenter2D, FVector2D::ZeroVector);
-            DrawCrosshair(HUDPackage.TopCrosshair, ViewportCenter2D, FVector2D(0, -CrosshairScaled));
-            DrawCrosshair(HUDPackage.BottomCrosshair, ViewportCenter2D, FVector2D(0, CrosshairScaled));
-            DrawCrosshair(HUDPackage.LeftCrosshair, ViewportCenter2D, FVector2D(-CrosshairScaled, 0));
-            DrawCrosshair(HUDPackage.RightCrosshair, ViewportCenter2D, FVector2D(CrosshairScaled, 0));
+            DrawCrosshair(HUDPackage.CenterCrosshair, ViewportCenter2D, FVector2D::ZeroVector, HUDPackage.CrosshairColor);
+            DrawCrosshair(HUDPackage.TopCrosshair, ViewportCenter2D, FVector2D(0, -CrosshairScaled), HUDPackage.CrosshairColor);
+            DrawCrosshair(HUDPackage.BottomCrosshair, ViewportCenter2D, FVector2D(0, CrosshairScaled), HUDPackage.CrosshairColor);
+            DrawCrosshair(HUDPackage.LeftCrosshair, ViewportCenter2D, FVector2D(-CrosshairScaled, 0), HUDPackage.CrosshairColor);
+            DrawCrosshair(HUDPackage.RightCrosshair, ViewportCenter2D, FVector2D(CrosshairScaled, 0), HUDPackage.CrosshairColor);
         }
     }
 }
@@ -32,7 +32,7 @@ void ABlasterHUD::DrawHUD()
  * To draw the crosshair components exactly at the center of the viewport,
  * draw the texture with its upperleft corner at the viewport center (move them to the LEFT and UP by half of the texture size) 
 */
-void ABlasterHUD::DrawCrosshair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& SpreadFactor)
+void ABlasterHUD::DrawCrosshair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& SpreadFactor, FLinearColor CrosshairColor)
 {
     float TextureX = ViewportCenter.X - (Texture->GetSizeX() / 2) + SpreadFactor.X;
     float TextureY = ViewportCenter.Y - (Texture->GetSizeY() / 2) + SpreadFactor.Y;
@@ -47,6 +47,6 @@ void ABlasterHUD::DrawCrosshair(UTexture2D* Texture, const FVector2D& ViewportCe
         0.f,
         1.f,
         1.f,
-        FLinearColor::Red
+        CrosshairColor
     );
 }

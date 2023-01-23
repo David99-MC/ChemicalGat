@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "ChemicalGat/HUD/BlasterHUD.h"
+
 #include "CombatComponent.generated.h"
 
 #define TRACE_LENGTH 80000.f
@@ -66,18 +68,30 @@ private:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float AimWalkSpeed;
 
-	float JumpingFactor = 0.f;
-
-	UPROPERTY(EditAnywhere, Category = Combat)
-	float JumpingFactorMax;
-
 	bool bIsFiring;
 
 	ABlasterPlayerController* BlasterController;
 
+	FVector HitTarget;
+
 	ABlasterHUD* BlasterHUD;
 
-	FVector HitTarget;
+	UPROPERTY(EditAnywhere, Category = "Combat | Aiming")
+	float CrosshairShrinkFactor = 30.f;
+
+	UPROPERTY(EditAnywhere, Category = "Combat | Aiming")
+	float DefaultCrosshairSpread = 0.55f;
+
+	UPROPERTY(EditAnywhere, Category = "Combat | Aiming")
+	float CrosshairJumpFactorMax;
+
+	float CrosshairJumpFactor = 0.f;
+
+	float CrosshairAimFactor;
+
+	float CrosshairShootingFactor;
+
+	FHUDPackage HUDPackage;
 
 	/**
 	 *  @param DefaultFOV default character follow camera's field of view
@@ -87,7 +101,7 @@ private:
 	float DefaultFOV;
 	float CurrentFOV;
 
-	UPROPERTY(EditAnywhere, Category = Combat)
+	UPROPERTY(EditAnywhere, Category = "Combat | Aiming")
 	float UnZoomInterpSpeed = 20.f;
 
 private:

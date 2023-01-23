@@ -31,10 +31,10 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
         AttachLeftHandToWeapon();
 
     if (BlasterCharacter->IsLocallyControlled())
-        RightHandRotationDebug();
+        RotateRightHand();
 }
 
-void UBlasterAnimInstance::RightHandRotationDebug()
+void UBlasterAnimInstance::RotateRightHand()
 {
     if (BlasterCharacter && EquippedWeapon)
     {

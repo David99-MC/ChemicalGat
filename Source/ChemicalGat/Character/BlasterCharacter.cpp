@@ -58,6 +58,7 @@ ABlasterCharacter::ABlasterCharacter()
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
 	TurnInPlace = ETurnInPlace::ETIP_NotTurning;
 
@@ -89,6 +90,7 @@ void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	SetAimOffsets(DeltaTime);
+	HideMeshWhenCameraIsClose();
 }
 
 // Called to bind functionality to input
@@ -323,6 +325,29 @@ void ABlasterCharacter::SetTurnInPlace(float DeltaTime)
 			TurnInPlace = ETurnInPlace::ETIP_NotTurning;
 			StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
 		}
+	}
+}
+
+void ABlasterCharacter::HideMeshWhenCameraIsClose()
+{
+	if (!IsLocallyControlled()) 
+		return;
+
+	if (FollowCamera && (FollowCamera->GetComponentLocation() - GetActorLocation()).Size() < CameraThreshold)
+	{
+		GetMesh()->SetVisibility(false);
+		// if (GetEquippedWeapon())
+		// {
+		// 	GetEquippedWeapon()->GetWeaponMesh()->bOwnerNoSee = true;
+		// }
+	}
+	else
+	{
+		GetMesh()->SetVisibility(true);
+		// if (GetEquippedWeapon())
+		// {
+		// 	GetEquippedWeapon()->GetWeaponMesh()->bOwnerNoSee = false;
+		// }
 	}
 }
 

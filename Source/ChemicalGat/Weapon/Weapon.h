@@ -38,9 +38,10 @@ public:
 	void SetWeaponState(EWeaponState State);
 	virtual void Fire(const FVector& HitTarget);
 	
-	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
+	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	FORCEINLINE float GetZoomedInterpSpeed() const { return ZoomedInterpSpeed; }
+	FORCEINLINE float GetCrosshairShootingFactor() const { return CrosshairShootingFactor; }
 
 private:
 	UFUNCTION()
@@ -92,6 +93,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = WeaponProperties)
 	float ZoomedInterpSpeed = 20.f;
+
+	UPROPERTY(EditAnywhere, Category = WeaponProperties)
+	float CrosshairShootingFactor;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = WeaponProperties)

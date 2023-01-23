@@ -19,7 +19,8 @@ public: // All these values to be set in the CombatComponent
 	UTexture2D* BottomCrosshair;
 	UTexture2D* LeftCrosshair;
 	UTexture2D* RightCrosshair;
-	float CrosshairSpread; 
+	float CrosshairSpread;
+	FLinearColor CrosshairColor; 
 };
 
 /**
@@ -44,7 +45,7 @@ private:
 	/**
 	 * @param SpreadFactor	Represented by an FVector2D to determine whether it should spread in the X or Y direction 
 	*/
-	void DrawCrosshair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& SpreadFactor);
+	void DrawCrosshair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& SpreadFactor, FLinearColor CrosshairColor);
 
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& PackageToSet) { HUDPackage = PackageToSet; } 

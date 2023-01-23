@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "ChemicalGat/BlasterTypes/TurningInPlace.h"
+#include "ChemicalGat/Interfaces/InteractWithCrosshairInterface.h"
+
 #include "BlasterCharacter.generated.h"
 
 /** Forward Declarations */
@@ -19,7 +21,7 @@ class UCombatComponent;
 class UAnimMontage;
 
 UCLASS()
-class CHEMICALGAT_API ABlasterCharacter : public ACharacter
+class CHEMICALGAT_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairInterface
 {
 	GENERATED_BODY()
 
@@ -73,6 +75,8 @@ private:
 	void SetAimOffsets(float DeltaTime);
 
 	void SetTurnInPlace(float DeltaTime);
+
+	void HideMeshWhenCameraIsClose();
 
 private: // Variables
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -128,6 +132,9 @@ private: // Variables
 	UAnimMontage* RifleMontage;
 
 	FVector HitTarget;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float CameraThreshold = 200.f;
 	
 public:
 	UPROPERTY(EditAnywhere, Category = WeaponRotationCorrection)
