@@ -85,6 +85,9 @@ private:
 
 	AWeapon* EquippedWeapon;
 	
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	bool bShouldRotateRootBone;
+	
 private:
 	void SetYawOffset(float DeltaTime);
 	void SetLean(float DeltaTime);

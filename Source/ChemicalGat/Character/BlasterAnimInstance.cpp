@@ -41,7 +41,7 @@ void UBlasterAnimInstance::RotateRightHand()
         bIsLocallyControlled = true;
         RightHandTransform = BlasterCharacter->GetMesh()->GetSocketTransform(FName("Hand_R"), ERelativeTransformSpace::RTS_World);
         RightHandRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget()));
-        RightHandRotation.Roll += BlasterCharacter->RightHandRotationRollOffset;
+        RightHandRotation.Roll += BlasterCharacter->GetRightHandRotationRollOffset();
     }
     
 }
@@ -67,6 +67,8 @@ void UBlasterAnimInstance::UpdateCombat()
     AOPitch = BlasterCharacter->GetAOPitch();
 
     TurnInPlace = BlasterCharacter->GetTurnInPlace();
+
+    bShouldRotateRootBone = BlasterCharacter->GetShouldRotateRootBone();
 }
 
 void UBlasterAnimInstance::UpdateWeapon()

@@ -91,7 +91,20 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	SetAimOffsets(DeltaTime);
+	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
+	{
+		SetAimOffsets(DeltaTime);
+	}
+	else // On simulated proxy
+	{
+		TimeSinceLastMovementReplication += DeltaTime;
+		if (TimeSinceLastMovementReplication >= 0.25f)
+		{
+			OnRep_ReplicatedMovement();
+		}
+		CalculateAOPitch();
+	}
+
 	HideMeshWhenCameraIsClose();
 }
 
@@ -266,12 +279,12 @@ void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 		StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0); 
 		return;
 	}
-	FVector Velocity = GetVelocity();
-	float Speed = Velocity.Size2D();
+	float Speed = GetVelocity().Size2D();
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
 
-	if (Speed < 0.1f && !bIsInAir) // standing still and not jumping
+	if (Speed < 0.01f && !bIsInAir) // standing still and not jumping
 	{
+		bShouldRotateRootBone = true;
 		FRotator CurrentBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
 		FRotator DeltaBaseAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentBaseAimRotation, StartingBaseAimRotation);
 		AOYaw = DeltaBaseAimRotation.Yaw;
@@ -285,12 +298,63 @@ void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 
 	if (Speed > 0.f || bIsInAir) // running or jumping
 	{
+		bShouldRotateRootBone = false;
 		bUseControllerRotationYaw = true;
 		StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0);
 		AOYaw = 0;
 		TurnInPlace = ETurnInPlace::ETIP_NotTurning;
 	}
 
+	CalculateAOPitch();
+}
+
+void ABlasterCharacter::OnRep_ReplicatedMovement()
+{
+	Super::OnRep_ReplicatedMovement();
+
+	SimulatedProxiesTurn();
+	TimeSinceLastMovementReplication = 0;
+}
+ 
+void ABlasterCharacter::SimulatedProxiesTurn()
+{
+	if (!GetEquippedWeapon()) 
+		return;
+
+	bShouldRotateRootBone = false;
+	float Speed = GetVelocity().Size2D();
+	if (Speed > 0)
+	{
+		TurnInPlace = ETurnInPlace::ETIP_NotTurning;
+		return;
+	}
+	
+	ProxyRotationLastFrame = ProxyRotation;
+	ProxyRotation = GetActorRotation();
+	float ProxyDeltaRotationYaw = UKismetMathLibrary::NormalizedDeltaRotator(ProxyRotation, ProxyRotationLastFrame).Yaw;
+
+	if (FMath::Abs(ProxyDeltaRotationYaw) > TurnThreshold)
+	{
+		if (ProxyDeltaRotationYaw > TurnThreshold)
+		{
+			TurnInPlace = ETurnInPlace::ETIP_Right;
+		}
+		else if (ProxyDeltaRotationYaw < -TurnThreshold)
+		{
+			TurnInPlace = ETurnInPlace::ETIP_Left;
+		}
+		else
+		{
+			TurnInPlace = ETurnInPlace::ETIP_NotTurning;
+		}
+		return;
+	}
+	TurnInPlace = ETurnInPlace::ETIP_NotTurning;
+
+}
+
+void ABlasterCharacter::CalculateAOPitch()
+{
 	AOPitch = GetBaseAimRotation().Pitch;
 	if (AOPitch > 90.f && !IsLocallyControlled())
 	{
