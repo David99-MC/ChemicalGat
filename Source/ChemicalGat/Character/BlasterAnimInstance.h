@@ -27,6 +27,9 @@ private:
 	ABlasterCharacter* BlasterCharacter;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	FVector BlasterCharacterVelocity;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bIsInAir;
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
@@ -61,9 +64,18 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	FTransform LeftHandTransform;
+
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	FTransform RightHandTransform;
+
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	FRotator RightHandRotation;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	ETurnInPlace TurnInPlace;
+
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	bool bIsLocallyControlled;
 
 	FRotator CharacterRotationLastFrame;
 	
@@ -73,6 +85,9 @@ private:
 
 	AWeapon* EquippedWeapon;
 	
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	bool bShouldRotateRootBone;
+	
 private:
 	void SetYawOffset(float DeltaTime);
 	void SetLean(float DeltaTime);
@@ -80,5 +95,7 @@ private:
 	void UpdateCombat();
 	void UpdateWeapon();
 	void AttachLeftHandToWeapon();
+
+	void RotateRightHand();
 
 };

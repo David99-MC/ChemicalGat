@@ -9,6 +9,8 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
+#include "ChemicalGat/Character/BlasterCharacter.h"
+#include "ChemicalGat/ChemicalGat.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -25,9 +27,12 @@ AProjectile::AProjectile()
 	HitBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	HitBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	HitBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+	HitBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECollisionResponse::ECR_Block);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
+
+	SetLifeSpan(2.f);
 }
 
 // Called when the game starts or when spawned
@@ -60,6 +65,10 @@ void AProjectile::Tick(float DeltaTime)
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor))
+	{
+		BlasterCharacter->MulticastHit();
+	}
 	Destroy();
 }
 

@@ -29,10 +29,26 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
     if (bIsWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && BlasterCharacter->GetMesh())
         AttachLeftHandToWeapon();
+
+    if (BlasterCharacter->IsLocallyControlled())
+        RotateRightHand();
+}
+
+void UBlasterAnimInstance::RotateRightHand()
+{
+    if (BlasterCharacter && EquippedWeapon)
+    {
+        bIsLocallyControlled = true;
+        RightHandTransform = BlasterCharacter->GetMesh()->GetSocketTransform(FName("Hand_R"), ERelativeTransformSpace::RTS_World);
+        RightHandRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget()));
+        RightHandRotation.Roll += BlasterCharacter->GetRightHandRotationRollOffset();
+    }
+    
 }
 
 void UBlasterAnimInstance::UpdateLocomotion()
 {
+    BlasterCharacterVelocity = BlasterCharacter->GetVelocity();
     Speed = BlasterCharacter->GetVelocity().Size2D();
     bIsInAir = BlasterCharacter->GetCharacterMovement()->IsFalling();
     bIsAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0 ? true : false;
@@ -51,11 +67,13 @@ void UBlasterAnimInstance::UpdateCombat()
     AOPitch = BlasterCharacter->GetAOPitch();
 
     TurnInPlace = BlasterCharacter->GetTurnInPlace();
+
+    bShouldRotateRootBone = BlasterCharacter->GetShouldRotateRootBone();
 }
 
 void UBlasterAnimInstance::UpdateWeapon()
 {
-    bIsWeaponEquipped = BlasterCharacter->GetIsWeaponEquipped();
+    bIsWeaponEquipped = BlasterCharacter->GetEquippedWeapon() == nullptr ? false : true;
     EquippedWeapon = BlasterCharacter->GetEquippedWeapon();
 }
 
@@ -77,6 +95,7 @@ void UBlasterAnimInstance::AttachLeftHandToWeapon()
     // OutLocation and OutRotation are the data of the LeftHandSocket transformed to Hand_R bone space
     LeftHandTransform.SetLocation(OutLocation);
     LeftHandTransform.SetRotation(FQuat(OutRotation));
+    
 }
 
 void UBlasterAnimInstance::SetYawOffset(float DeltaTime)

@@ -10,6 +10,7 @@ class USphereComponent;
 class UWidgetComponent;
 class UAnimationAsset;
 class AProjectile;
+class UTexture2D;
 
 UENUM(BlueprintType) // Enable this enum class in the blueprint
 enum class EWeaponState : uint8
@@ -30,15 +31,49 @@ public:
 	// Sets default values for this actor's properties
 	AWeapon();
 
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	void ShowPickupWidget(bool bShowWidget);
+	void SetWeaponState(EWeaponState State);
+	virtual void Fire(const FVector& HitTarget);
+	
+	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
+	FORCEINLINE float GetZoomedInterpSpeed() const { return ZoomedInterpSpeed; }
+	FORCEINLINE float GetCrosshairShootingFactor() const { return CrosshairShootingFactor; }
+	FORCEINLINE float GetFireDelay() const { return FireDelay; }
+	FORCEINLINE bool IsAutomatic() const { return bIsAutomatic; }
+
+private:
+	UFUNCTION()
+	void OnRep_WeaponState();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	virtual void OnAreaSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	virtual void OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
+public:
+	UPROPERTY(EditAnywhere, Category = Crosshair)
+	UTexture2D* CenterCrosshair;
+
+	UPROPERTY(EditAnywhere, Category = Crosshair)
+	UTexture2D* TopCrosshair;
+
+	UPROPERTY(EditAnywhere, Category = Crosshair)
+	UTexture2D* BottomCrosshair;
+
+	UPROPERTY(EditAnywhere, Category = Crosshair)
+	UTexture2D* LeftCrosshair;
+
+	UPROPERTY(EditAnywhere, Category = Crosshair)
+	UTexture2D* RightCrosshair;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = WeaponProperties)
 	USkeletalMeshComponent* WeaponMesh;
@@ -49,30 +84,29 @@ private:
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_WeaponState, Category = WeaponProperties)
 	EWeaponState WeaponState;
 
-	UFUNCTION()
-	void OnRep_WeaponState();
-
 	UPROPERTY(VisibleAnywhere, Category = WeaponProperties)
 	UWidgetComponent* PickupWidget;
 
 	UPROPERTY(EditAnywhere, Category = WeaponProperties)
 	UAnimationAsset* FireAnimation;	
 
+	UPROPERTY(EditAnywhere, Category = WeaponProperties)
+	float ZoomedFOV = 30.f;
+
+	UPROPERTY(EditAnywhere, Category = WeaponProperties)
+	float ZoomedInterpSpeed = 20.f;
+
+	UPROPERTY(EditAnywhere, Category = WeaponProperties)
+	float CrosshairShootingFactor;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float FireDelay = 0.15f;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	bool bIsAutomatic = true;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = WeaponProperties)
 	TSubclassOf<AProjectile> ProjectileClass;
-
-protected:
-	UFUNCTION()
-	virtual void OnAreaSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION()
-	virtual void OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-public:
-	void ShowPickupWidget(bool bShowWidget);
-	void SetWeaponState(EWeaponState State);
-	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
-	virtual void Fire(const FVector& HitTarget);
 
 };

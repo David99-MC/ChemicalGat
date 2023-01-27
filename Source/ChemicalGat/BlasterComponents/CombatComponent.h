@@ -4,12 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "ChemicalGat/HUD/BlasterHUD.h"
+
 #include "CombatComponent.generated.h"
 
 #define TRACE_LENGTH 80000.f
 
 class ABlasterCharacter;
 class AWeapon;
+class ABlasterPlayerController;
+class ABlasterHUD;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CHEMICALGAT_API UCombatComponent : public UActorComponent
@@ -44,6 +48,8 @@ protected:
 
 	void TraceLineUnderCrosshair(FHitResult& TraceHitResult);
 
+	void SetHUDCrosshairs(float DeltaTime);
+
 public:
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
@@ -56,15 +62,71 @@ private:
 	UPROPERTY(Replicated)
 	bool bIsAiming;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Combat)
 	float BaseWalkSpeed;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Combat)
 	float AimWalkSpeed;
 
 	bool bIsFiring;
 
+	ABlasterPlayerController* BlasterController;
+
+	FVector HitTarget;
+
+	ABlasterHUD* BlasterHUD;
+
+	UPROPERTY(EditAnywhere, Category = "Combat | Aiming")
+	float CrosshairShrinkFactor = 30.f;
+
+	UPROPERTY(EditAnywhere, Category = "Combat | Aiming")
+	float DefaultCrosshairSpread = 0.55f;
+
+	UPROPERTY(EditAnywhere, Category = "Combat | Aiming")
+	float CrosshairJumpFactorMax;
+
+	float CrosshairJumpFactor = 0.f;
+
+	float CrosshairAimFactor;
+
+	float CrosshairShootingFactor;
+
+	FHUDPackage HUDPackage;
+
+	/**
+	 * 	Weapon Zooming/Scoping
+	 * 
+	 *  @param DefaultFOV default character follow camera's field of view
+	 *  @param CurrentFOV determine how much the follow camera's fov should interp to 
+	 *  NOTE: The closer to 0, the more zoomed it becomes
+	*/
+	float DefaultFOV;
+	float CurrentFOV;
+
+	UPROPERTY(EditAnywhere, Category = "Combat | Aiming")
+	float UnZoomInterpSpeed = 20.f;
+
+	/**
+	 *  Automatic fire
+	 * 
+	 * @param FireTimer Timer delegate used to determine the delay between shots
+	 * @param FireDelay Amount of delay in seconds (retrieved from EquippedWeapon)
+	 * @param bCanFire Determine when is the next time can the weapon shoot
+	*/
+
+	FTimerHandle FireTimer;
+
+	bool bCanFire = true;
+
 private:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
+
+	void InterpFOV(float DeltaTime);
+
+	void StartFireTimer();
+
+	void FireTimerFinished();
+
+	void Fire();
 };
