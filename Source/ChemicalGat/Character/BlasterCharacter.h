@@ -150,7 +150,7 @@ private: // Variables
 	float RightHandRotationRollOffset;
 	
 	bool bShouldRotateRootBone;
-	float TurnThreshold = 15.f;
+	float TurnThreshold = 1.5f;
 	FRotator ProxyRotationLastFrame;
 	FRotator ProxyRotation;
 	float TimeSinceLastMovementReplication;

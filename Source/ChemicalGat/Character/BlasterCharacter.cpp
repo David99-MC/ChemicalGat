@@ -318,7 +318,7 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
  
 void ABlasterCharacter::SimulatedProxiesTurn()
 {
-	if (!GetEquippedWeapon()) 
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) 
 		return;
 
 	bShouldRotateRootBone = false;
@@ -330,9 +330,9 @@ void ABlasterCharacter::SimulatedProxiesTurn()
 	}
 	
 	ProxyRotationLastFrame = ProxyRotation;
-	ProxyRotation = GetActorRotation();
+	ProxyRotation = GetActorRotation(); 
 	float ProxyDeltaRotationYaw = UKismetMathLibrary::NormalizedDeltaRotator(ProxyRotation, ProxyRotationLastFrame).Yaw;
-
+	UE_LOG(LogTemp, Warning, TEXT("Proxy Yaw: %f"), ProxyDeltaRotationYaw);
 	if (FMath::Abs(ProxyDeltaRotationYaw) > TurnThreshold)
 	{
 		if (ProxyDeltaRotationYaw > TurnThreshold)

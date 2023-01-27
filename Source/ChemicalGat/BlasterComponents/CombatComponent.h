@@ -94,6 +94,8 @@ private:
 	FHUDPackage HUDPackage;
 
 	/**
+	 * 	Weapon Zooming/Scoping
+	 * 
 	 *  @param DefaultFOV default character follow camera's field of view
 	 *  @param CurrentFOV determine how much the follow camera's fov should interp to 
 	 *  NOTE: The closer to 0, the more zoomed it becomes
@@ -104,9 +106,27 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Combat | Aiming")
 	float UnZoomInterpSpeed = 20.f;
 
+	/**
+	 *  Automatic fire
+	 * 
+	 * @param FireTimer Timer delegate used to determine the delay between shots
+	 * @param FireDelay Amount of delay in seconds (retrieved from EquippedWeapon)
+	 * @param bCanFire Determine when is the next time can the weapon shoot
+	*/
+
+	FTimerHandle FireTimer;
+
+	bool bCanFire = true;
+
 private:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
 	void InterpFOV(float DeltaTime);
+
+	void StartFireTimer();
+
+	void FireTimerFinished();
+
+	void Fire();
 };

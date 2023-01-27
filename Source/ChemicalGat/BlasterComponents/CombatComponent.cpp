@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "ChemicalGat/PlayerController/BlasterPlayerController.h"
 #include "Camera/CameraComponent.h"
+#include "TimerManager.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -186,15 +187,9 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bAiming)
 void UCombatComponent::FireButtonPressed(bool bPressed)
 {
 	bIsFiring = bPressed;
-	if (bIsFiring)
+	if (bIsFiring && EquippedWeapon)
 	{
-		FHitResult HitResult;
-		TraceLineUnderCrosshair(HitResult); // filling in the HitResult information
-		ServerFireButtonPressed(HitResult.ImpactPoint);
-		if (EquippedWeapon)
-		{
-			CrosshairShootingFactor = EquippedWeapon->GetCrosshairShootingFactor();
-		}
+		Fire();
 	}
 }
 
@@ -209,6 +204,40 @@ void UCombatComponent::MulticastFireButtonPressed_Implementation(const FVector_N
 	{
 		BlasterCharacter->PlayRifleMontage(bIsAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
+	}
+}
+
+void UCombatComponent::Fire()
+{
+	if (bCanFire)
+	{
+		ServerFireButtonPressed(HitTarget);
+		bCanFire = false;
+		if (EquippedWeapon)
+		{
+			CrosshairShootingFactor = EquippedWeapon->GetCrosshairShootingFactor();
+		}
+		StartFireTimer();
+	}
+}
+
+void UCombatComponent::StartFireTimer()
+{
+	if (BlasterCharacter && EquippedWeapon)
+	{
+		BlasterCharacter->GetWorldTimerManager().SetTimer(FireTimer, this, &UCombatComponent::FireTimerFinished, EquippedWeapon->GetFireDelay());
+	}
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (EquippedWeapon == nullptr) 
+		return;
+
+	bCanFire = true;
+	if (bIsFiring && EquippedWeapon->IsAutomatic()) // keep firing if the button is still being press
+	{
+		Fire();
 	}
 }
 
@@ -266,5 +295,5 @@ void UCombatComponent::TraceLineUnderCrosshair(FHitResult& TraceHitResult)
 			TraceHitResult.ImpactPoint = End; 
 		}
 	}
-	
 }
+

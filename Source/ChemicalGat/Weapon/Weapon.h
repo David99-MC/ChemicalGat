@@ -42,6 +42,8 @@ public:
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	FORCEINLINE float GetZoomedInterpSpeed() const { return ZoomedInterpSpeed; }
 	FORCEINLINE float GetCrosshairShootingFactor() const { return CrosshairShootingFactor; }
+	FORCEINLINE float GetFireDelay() const { return FireDelay; }
+	FORCEINLINE bool IsAutomatic() const { return bIsAutomatic; }
 
 private:
 	UFUNCTION()
@@ -96,6 +98,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = WeaponProperties)
 	float CrosshairShootingFactor;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float FireDelay = 0.15f;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	bool bIsAutomatic = true;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = WeaponProperties)
