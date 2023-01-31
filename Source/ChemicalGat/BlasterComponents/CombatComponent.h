@@ -107,7 +107,7 @@ private:
 	float UnZoomInterpSpeed = 20.f;
 
 	/**
-	 *  Automatic fire
+	 *  Automatic Fire
 	 * 
 	 * @param FireTimer Timer delegate used to determine the delay between shots
 	 * @param FireDelay Amount of delay in seconds (retrieved from EquippedWeapon)
