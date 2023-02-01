@@ -16,6 +16,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Animation/AnimInstance.h"
 #include "ChemicalGat/ChemicalGat.h"
+#include "ChemicalGat/PlayerController/BlasterPlayerController.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -73,6 +74,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
+	DOREPLIFETIME(ABlasterCharacter, Health);
 }
 
 // Called when the game starts or when spawned
@@ -85,6 +87,11 @@ void ABlasterCharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultBlasterMappingContext, 0);
 		}
+	}
+	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
 	}
 }
 // Called every frame
@@ -457,4 +464,9 @@ void ABlasterCharacter::PlayHitReactMontage()
 void ABlasterCharacter::MulticastHit_Implementation()
 {
 	PlayHitReactMontage();
+}
+
+void ABlasterCharacter::OnRep_Health()
+{
+	
 }

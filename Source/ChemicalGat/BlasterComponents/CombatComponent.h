@@ -74,7 +74,13 @@ private:
 
 	FVector HitTarget;
 
+	/**
+	 *  Aim crosshairs HUD
+	*/
+
 	ABlasterHUD* BlasterHUD;
+
+	FHUDPackage HUDPackage;
 
 	UPROPERTY(EditAnywhere, Category = "Combat | Aiming")
 	float CrosshairShrinkFactor = 30.f;
@@ -90,8 +96,6 @@ private:
 	float CrosshairAimFactor;
 
 	float CrosshairShootingFactor;
-
-	FHUDPackage HUDPackage;
 
 	/**
 	 * 	Weapon Zooming/Scoping

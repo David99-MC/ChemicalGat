@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "BlasterPlayerController.generated.h"
 
+class ABlasterHUD;
 /**
  * 
  */
@@ -14,4 +15,12 @@ class CHEMICALGAT_API ABlasterPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	ABlasterHUD* BlasterHUD;
+
+public:
+	void SetHUDHealth(float Health, float MaxHealth);
 };

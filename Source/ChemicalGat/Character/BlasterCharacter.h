@@ -19,6 +19,7 @@ class UWidgetComponent;
 class AWeapon;
 class UCombatComponent;
 class UAnimMontage;
+class ABlasterPlayerController;
 
 UCLASS()
 class CHEMICALGAT_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairInterface
@@ -122,7 +123,20 @@ private: // Variables
 	UPROPERTY(VisibleAnywhere)
 	UCombatComponent* Combat;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* RifleMontage;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* HitReactMontage;
+
+	FVector HitTarget;
+
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float CameraThreshold = 200.f;
+
 	/** 
+	 * Implementing Aimoffsets
+	 * 
 	 * @param AOYaw used to set Yaw Value of the Blendspace
 	 * @param InterpAOYaw used to reset the AOYaw to 0 for turning in place  
 	 * @param AOPitch used to set Lean Value of the Blendspace
@@ -135,25 +149,31 @@ private: // Variables
 
 	ETurnInPlace TurnInPlace;
 
-	UPROPERTY(EditAnywhere, Category = Combat)
-	UAnimMontage* RifleMontage;
-
-	UPROPERTY(EditAnywhere, Category = Combat)
-	UAnimMontage* HitReactMontage;
-
-	FVector HitTarget;
-
-	UPROPERTY(EditAnywhere, Category = Combat)
-	float CameraThreshold = 200.f;
-
 	UPROPERTY(EditAnywhere, Category = WeaponRotationCorrection)
 	float RightHandRotationRollOffset;
-	
+
+	/**
+	 * Smoothing Proxies' rotation
+	*/
 	bool bShouldRotateRootBone;
 	float TurnThreshold = 1.5f;
 	FRotator ProxyRotationLastFrame;
 	FRotator ProxyRotation;
 	float TimeSinceLastMovementReplication;
+
+	/**
+	 * Player Health and Stats
+	*/
+	UPROPERTY(EditAnywhere, Category = Stats)
+	float MaxHealth = 100.f;
+	
+	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = Stats)
+	float Health = 100.f;
+
+	UFUNCTION()
+	void OnRep_Health();
+
+	ABlasterPlayerController* BlasterPlayerController;
 
 public:
 

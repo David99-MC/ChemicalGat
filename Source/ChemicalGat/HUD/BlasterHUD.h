@@ -7,6 +7,7 @@
 #include "BlasterHUD.generated.h"
 
 class UTexture2D;
+class UCharacterOverlay;
 
 USTRUCT(BlueprintType)
 struct FHUDPackage
@@ -33,6 +34,7 @@ class CHEMICALGAT_API ABlasterHUD : public AHUD
 	
 protected:
 	virtual void DrawHUD() override;
+	virtual void BeginPlay() override;
 
 private:
 	FHUDPackage HUDPackage;
@@ -41,12 +43,20 @@ private:
 	UPROPERTY(EditAnywhere)
 	float CrosshairSpreadMax = 15.f;
 
+public:
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	TSubclassOf<UUserWidget> CharacterOverlayClass;
+
+	UCharacterOverlay* CharacterOverlay;
+
 private:
 	/**
 	 * @param SpreadFactor	Represented by an FVector2D to determine whether it should spread in the X or Y direction 
 	*/
 	void DrawCrosshair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& SpreadFactor, FLinearColor CrosshairColor);
 
+	void AddCharacterOverlay();
+	
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& PackageToSet) { HUDPackage = PackageToSet; } 
 };
