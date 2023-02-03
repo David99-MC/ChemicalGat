@@ -89,6 +89,10 @@ void ABlasterCharacter::BeginPlay()
 		}
 	}
 	UpdateHUDHealth();
+	if (HasAuthority())
+	{
+		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
+	}
 }
 // Called every frame
 void ABlasterCharacter::Tick(float DeltaTime)
@@ -454,15 +458,16 @@ void ABlasterCharacter::PlayHitReactMontage()
 }
 
 /** This is only called on the server */
-float ABlasterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float DamageAmount, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
+
 	Health = FMath::Max(0, Health - DamageAmount);
 	UpdateHUDHealth();
 	PlayHitReactMontage();
-	return DamageAmount;
+
 }
   
-/** Make sure the client react with the TakeDamage as well */
+/** Make sure the client react when their Health change as well */
 void ABlasterCharacter::OnRep_Health() 
 {
 	UpdateHUDHealth();

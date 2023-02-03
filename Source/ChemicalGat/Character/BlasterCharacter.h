@@ -68,7 +68,8 @@ protected:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION()
+	virtual void ReceiveDamage(AActor* DamagedActor, float DamageAmount, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
 
 private:
 	// A Remote Procedure Call (RPC) to allow the client to also pick up the weapon 
