@@ -17,6 +17,7 @@
 #include "Animation/AnimInstance.h"
 #include "ChemicalGat/ChemicalGat.h"
 #include "ChemicalGat/PlayerController/BlasterPlayerController.h"
+#include "ChemicalGat/GameMode/BlasterGameMode.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -460,11 +461,19 @@ void ABlasterCharacter::PlayHitReactMontage()
 /** This is only called on the server */
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float DamageAmount, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
-
 	Health = FMath::Max(0, Health - DamageAmount);
 	UpdateHUDHealth();
 	PlayHitReactMontage();
 
+	if (Health <= 0.f)
+	{
+		BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+		if (ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			ABlasterPlayerController* AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
+			BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
+		}
+	}
 }
   
 /** Make sure the client react when their Health change as well */
