@@ -48,9 +48,6 @@ public:
 	FVector GetHitTarget() const;
 	void PlayRifleMontage(bool bIsAiming);
 
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastHit();
-
 protected:
 	virtual void BeginPlay() override;
 	/** Bind to movement input */
@@ -81,12 +78,16 @@ private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
+	UFUNCTION()
+	void OnRep_Health();
+
 	void SetAimOffsets(float DeltaTime);
 	void SetTurnInPlace(float DeltaTime);
 	void HideMeshWhenCameraIsClose();
 	void PlayHitReactMontage();
 	void SimulatedProxiesTurn();
 	void CalculateAOPitch();
+	void UpdateHUDHealth();
 
 private: // Variables
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -171,9 +172,6 @@ private: // Variables
 	
 	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = Stats)
 	float Health = 100.f;
-
-	UFUNCTION()
-	void OnRep_Health();
 
 	ABlasterPlayerController* BlasterPlayerController;
 

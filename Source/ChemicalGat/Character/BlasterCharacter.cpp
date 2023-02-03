@@ -88,11 +88,7 @@ void ABlasterCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultBlasterMappingContext, 0);
 		}
 	}
-	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
-	if (BlasterPlayerController)
-	{
-		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
-	}
+	UpdateHUDHealth();
 }
 // Called every frame
 void ABlasterCharacter::Tick(float DeltaTime)
@@ -412,10 +408,6 @@ void ABlasterCharacter::HideMeshWhenCameraIsClose()
 	else
 	{
 		GetMesh()->SetVisibility(true);
-		// if (GetEquippedWeapon())
-		// {
-		// 	GetEquippedWeapon()->GetWeaponMesh()->bOwnerNoSee = false;
-		// }
 	}
 }
 
@@ -424,6 +416,13 @@ AWeapon* ABlasterCharacter::GetEquippedWeapon() const
 	if (Combat == nullptr) 
 		return nullptr;
 	return Combat->EquippedWeapon;
+}
+
+FVector ABlasterCharacter::GetHitTarget() const
+{
+	if (!Combat) 
+		return FVector();
+	return Combat->HitTarget;
 }
 
 void ABlasterCharacter::PlayRifleMontage(bool bIsAiming)
@@ -440,13 +439,6 @@ void ABlasterCharacter::PlayRifleMontage(bool bIsAiming)
 	}
 }
 
-FVector ABlasterCharacter::GetHitTarget() const
-{
-	if (!Combat) 
-		return FVector();
-	return Combat->HitTarget;
-}
-
 void ABlasterCharacter::PlayHitReactMontage()
 {
 	if (!GetEquippedWeapon()) 
@@ -461,18 +453,27 @@ void ABlasterCharacter::PlayHitReactMontage()
 	}
 }
 
-void ABlasterCharacter::MulticastHit_Implementation()
+/** This is only called on the server */
+float ABlasterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	Health = FMath::Max(0, Health - DamageAmount);
+	UpdateHUDHealth();
+	PlayHitReactMontage();
+	return DamageAmount;
+}
+  
+/** Make sure the client react with the TakeDamage as well */
+void ABlasterCharacter::OnRep_Health() 
+{
+	UpdateHUDHealth();
 	PlayHitReactMontage();
 }
 
-void ABlasterCharacter::OnRep_Health()
+void ABlasterCharacter::UpdateHUDHealth()
 {
-	
-}
-
-float ABlasterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	
-	return 0.f;
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
 }
