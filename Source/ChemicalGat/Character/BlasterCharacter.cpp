@@ -470,3 +470,9 @@ void ABlasterCharacter::OnRep_Health()
 {
 	
 }
+
+float ABlasterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	
+	return 0.f;
+}

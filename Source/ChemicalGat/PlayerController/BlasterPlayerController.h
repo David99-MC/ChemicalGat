@@ -22,5 +22,5 @@ private:
 	ABlasterHUD* BlasterHUD;
 
 public:
-	void SetHUDHealth(float Health, float MaxHealth);
+	void SetHUDHealth(float Health, float MaxHealth); // to be called on BlasterCharacter class
 };
