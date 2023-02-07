@@ -87,6 +87,9 @@ private:
 	
 	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	bool bShouldRotateRootBone;
+
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	bool bIsEliminated;
 	
 private:
 	void SetYawOffset(float DeltaTime);

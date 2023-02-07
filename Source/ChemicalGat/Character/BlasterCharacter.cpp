@@ -432,7 +432,7 @@ FVector ABlasterCharacter::GetHitTarget() const
 
 void ABlasterCharacter::PlayRifleMontage(bool bIsAiming)
 {
-	if (!Combat || !Combat->EquippedWeapon)
+	if (!GetEquippedWeapon())
 		return;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -455,6 +455,15 @@ void ABlasterCharacter::PlayHitReactMontage()
 		AnimInstance->Montage_Play(HitReactMontage);
 		FName SectionName = FName("FromFront");
 		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void ABlasterCharacter::PlayElimMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && ElimMontage)
+	{
+		AnimInstance->Montage_Play(ElimMontage);
 	}
 }
 
@@ -490,4 +499,10 @@ void ABlasterCharacter::UpdateHUDHealth()
 	{
 		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
 	}
+}
+
+void ABlasterCharacter::PlayerElim_Implementation()
+{
+	bIsEliminated = true;
+	PlayElimMontage();
 }

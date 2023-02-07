@@ -41,12 +41,18 @@ public:
 	FORCEINLINE ETurnInPlace GetTurnInPlace() const { return TurnInPlace; }
 	FORCEINLINE float GetRightHandRotationRollOffset() const { return RightHandRotationRollOffset; }
 	FORCEINLINE bool GetShouldRotateRootBone() const { return bShouldRotateRootBone; }
+	FORCEINLINE bool GetIsEliminated() const { return bIsEliminated; }
 	
 	AWeapon* GetEquippedWeapon() const;
 	bool GetIsAiming() const;
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	FVector GetHitTarget() const;
 	void PlayRifleMontage(bool bIsAiming);
+	void PlayHitReactMontage();
+	void PlayElimMontage();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayerElim();
 
 protected:
 	virtual void BeginPlay() override;
@@ -85,11 +91,9 @@ private:
 	void SetAimOffsets(float DeltaTime);
 	void SetTurnInPlace(float DeltaTime);
 	void HideMeshWhenCameraIsClose();
-	void PlayHitReactMontage();
 	void SimulatedProxiesTurn();
 	void CalculateAOPitch();
 	void UpdateHUDHealth();
-	void PlayerElim();
 
 private: // Variables
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -134,6 +138,9 @@ private: // Variables
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* HitReactMontage;
 
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ElimMontage;
+
 	FVector HitTarget;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
@@ -156,6 +163,7 @@ private: // Variables
 
 	UPROPERTY(EditAnywhere, Category = WeaponRotationCorrection)
 	float RightHandRotationRollOffset;
+	/** ---------------------------------------------- */
 
 	/**
 	 * Smoothing Proxies' rotation
@@ -165,6 +173,7 @@ private: // Variables
 	FRotator ProxyRotationLastFrame;
 	FRotator ProxyRotation;
 	float TimeSinceLastMovementReplication;
+	/** ---------------------------------------------- */
 
 	/**
 	 * Player Health and Stats
@@ -174,8 +183,11 @@ private: // Variables
 	
 	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = Stats)
 	float Health = 100.f;
+	/** ---------------------------------------------- */
 
 	ABlasterPlayerController* BlasterPlayerController;
+
+	bool bIsEliminated;
 
 public:
 

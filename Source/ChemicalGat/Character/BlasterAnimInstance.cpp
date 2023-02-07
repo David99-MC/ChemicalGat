@@ -56,6 +56,8 @@ void UBlasterAnimInstance::UpdateLocomotion()
         bShouldMove = true;
     else
         bShouldMove = false;
+    
+    bIsEliminated = BlasterCharacter->GetIsEliminated();
 }
 
 void UBlasterAnimInstance::UpdateCombat()
