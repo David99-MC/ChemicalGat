@@ -444,20 +444,6 @@ void ABlasterCharacter::PlayRifleMontage(bool bIsAiming)
 	}
 }
 
-void ABlasterCharacter::PlayHitReactMontage()
-{
-	if (!GetEquippedWeapon()) 
-		return;
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && HitReactMontage)
-	{
-		AnimInstance->Montage_Play(HitReactMontage);
-		FName SectionName = FName("FromFront");
-		AnimInstance->Montage_JumpToSection(SectionName);
-	}
-}
-
 void ABlasterCharacter::PlayElimMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -467,12 +453,24 @@ void ABlasterCharacter::PlayElimMontage()
 	}
 }
 
-/** This is only called on the server */
+void ABlasterCharacter::OnHealthUpdate()
+{
+	// if (HasAuthority()) //Server-specific functionality
+
+	// if (IsLocallyControlled()) //Client-specific functionality
+
+	UpdateHUDHealth();
+	if (bIsEliminated)
+		return;
+		
+	PlayHitReactMontage();
+}
+
+/** change the player's current Health value on the server */
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float DamageAmount, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
-	Health = FMath::Max(0, Health - DamageAmount);
-	UpdateHUDHealth();
-	PlayHitReactMontage();
+	Health = FMath::Clamp(Health - DamageAmount, 0.f, MaxHealth);
+	OnHealthUpdate();
 
 	if (Health <= 0.f)
 	{
@@ -488,8 +486,7 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float DamageAmount, 
 /** Make sure the client react when their Health change as well */
 void ABlasterCharacter::OnRep_Health() 
 {
-	UpdateHUDHealth();
-	PlayHitReactMontage();
+	OnHealthUpdate();
 }
 
 void ABlasterCharacter::UpdateHUDHealth()
@@ -498,6 +495,20 @@ void ABlasterCharacter::UpdateHUDHealth()
 	if (BlasterPlayerController)
 	{
 		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+void ABlasterCharacter::PlayHitReactMontage()
+{
+	if (!GetEquippedWeapon()) 
+		return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitReactMontage)
+	{
+		AnimInstance->Montage_Play(HitReactMontage);
+		FName SectionName = FName("FromFront");
+		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
 

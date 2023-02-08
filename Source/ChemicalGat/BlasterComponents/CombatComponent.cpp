@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CombatComponent.h"
 #include "ChemicalGat/Character/BlasterCharacter.h"
 #include "ChemicalGat/Weapon/Weapon.h"
@@ -294,4 +291,3 @@ void UCombatComponent::TraceLineUnderCrosshair(FHitResult& TraceHitResult)
 		}
 	}
 }
-

@@ -94,6 +94,8 @@ private:
 	void SimulatedProxiesTurn();
 	void CalculateAOPitch();
 	void UpdateHUDHealth();
+	
+	void OnHealthUpdate();
 
 private: // Variables
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
