@@ -22,6 +22,9 @@ public:
 	void NativeInitializeAnimation() override;
 	void NativeUpdateAnimation(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
+	void StopAnimation();
+
 private:
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	ABlasterCharacter* BlasterCharacter;

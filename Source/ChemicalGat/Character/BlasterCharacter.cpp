@@ -18,6 +18,7 @@
 #include "ChemicalGat/ChemicalGat.h"
 #include "ChemicalGat/PlayerController/BlasterPlayerController.h"
 #include "ChemicalGat/GameMode/BlasterGameMode.h"
+#include "TimerManager.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -460,6 +461,7 @@ void ABlasterCharacter::OnHealthUpdate()
 	// if (IsLocallyControlled()) //Client-specific functionality
 
 	UpdateHUDHealth();
+
 	if (bIsEliminated)
 		return;
 		
@@ -512,8 +514,33 @@ void ABlasterCharacter::PlayHitReactMontage()
 	}
 }
 
-void ABlasterCharacter::PlayerElim_Implementation()
+/** This will only get called on the server where the game mode exists */
+void ABlasterCharacter::PlayerElim()
+{
+	MulticastPlayerElim();
+	GetWorldTimerManager().SetTimer(
+		ElimTimer,
+		this,
+		&ABlasterCharacter::ElimTimerFinished,
+		ElimDelay
+	);
+}
+
+void ABlasterCharacter::MulticastPlayerElim_Implementation()
 {
 	bIsEliminated = true;
 	PlayElimMontage();
+}
+
+void ABlasterCharacter::ElimTimerFinished()
+{
+	if (ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		BlasterGameMode->RequestRespawn(this, Controller);
+	}
+}
+
+void ABlasterCharacter::StopAnimation()
+{
+	GetMesh()->bPauseAnims = true;
 }

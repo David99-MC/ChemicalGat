@@ -120,3 +120,11 @@ void UBlasterAnimInstance::SetLean(float DeltaTime)
     float Interp = FMath::FInterpTo(Lean, Target, DeltaTime, 6.f);
     Lean = FMath::Clamp(Interp, -90, 90);
 }
+
+void UBlasterAnimInstance::StopAnimation()
+{
+    if (BlasterCharacter == nullptr) 
+        return;
+
+    BlasterCharacter->StopAnimation();
+}

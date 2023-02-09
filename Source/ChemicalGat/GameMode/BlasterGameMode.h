@@ -17,5 +17,7 @@ class CHEMICALGAT_API ABlasterGameMode : public AGameMode
 	GENERATED_BODY()
 
 public:
-	void PlayerEliminated(ABlasterCharacter* EliminatedCharacter, ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController);
+	virtual void PlayerEliminated(ABlasterCharacter* EliminatedCharacter, ABlasterPlayerController* VictimController, ABlasterPlayerController* AttackerController);
+	virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController);
+
 };

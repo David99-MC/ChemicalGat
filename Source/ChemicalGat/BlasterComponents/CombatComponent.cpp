@@ -188,20 +188,6 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	}
 }
 
-void UCombatComponent::ServerFireButtonPressed_Implementation(const FVector_NetQuantize& TraceHitTarget)
-{
-	MulticastFireButtonPressed(TraceHitTarget);
-}
-
-void UCombatComponent::MulticastFireButtonPressed_Implementation(const FVector_NetQuantize& TraceHitTarget)
-{
-	if (BlasterCharacter && EquippedWeapon)
-	{
-		BlasterCharacter->PlayRifleMontage(bIsAiming);
-		EquippedWeapon->Fire(TraceHitTarget);
-	}
-}
-
 void UCombatComponent::Fire()
 {
 	if (bCanFire)
@@ -213,6 +199,20 @@ void UCombatComponent::Fire()
 			CrosshairShootingFactor = EquippedWeapon->GetCrosshairShootingFactor();
 		}
 		StartFireTimer();
+	}
+}
+
+void UCombatComponent::ServerFireButtonPressed_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+	MulticastFireButtonPressed(TraceHitTarget);
+}
+
+void UCombatComponent::MulticastFireButtonPressed_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+	if (BlasterCharacter && EquippedWeapon)
+	{
+		BlasterCharacter->PlayRifleMontage(bIsAiming);
+		EquippedWeapon->Fire(TraceHitTarget);
 	}
 }
 

@@ -30,6 +30,7 @@ public:
 	ABlasterCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 	// Register any variables to be replicated inside this function
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
@@ -42,17 +43,22 @@ public:
 	FORCEINLINE float GetRightHandRotationRollOffset() const { return RightHandRotationRollOffset; }
 	FORCEINLINE bool GetShouldRotateRootBone() const { return bShouldRotateRootBone; }
 	FORCEINLINE bool GetIsEliminated() const { return bIsEliminated; }
-	
 	AWeapon* GetEquippedWeapon() const;
 	bool GetIsAiming() const;
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	FVector GetHitTarget() const;
+
 	void PlayRifleMontage(bool bIsAiming);
 	void PlayHitReactMontage();
 	void PlayElimMontage();
+	void PlayerElim();
+
+	void StopAnimation();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void PlayerElim();
+	void MulticastPlayerElim();
+
+	void ElimTimerFinished();
 
 protected:
 	virtual void BeginPlay() override;
@@ -151,9 +157,9 @@ private: // Variables
 	/** 
 	 * Implementing Aimoffsets
 	 * 
-	 * @param AOYaw used to set Yaw Value of the Blendspace
-	 * @param InterpAOYaw used to reset the AOYaw to 0 for turning in place  
-	 * @param AOPitch used to set Lean Value of the Blendspace
+	 * @param AOYaw set Yaw Value of the Blendspace
+	 * @param InterpAOYaw reset the AOYaw to 0 for turning in place  
+	 * @param AOPitch set Lean Value of the Blendspace
 	*/
 	float AOYaw;
 	float InterpAOYaw;
@@ -189,7 +195,16 @@ private: // Variables
 
 	ABlasterPlayerController* BlasterPlayerController;
 
+	/**
+	 *  Elimination and Respawn
+	*/
 	bool bIsEliminated;
+
+	FTimerHandle ElimTimer;
+
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay = 3.f;
+	/** ---------------------------------------------- */
 
 public:
 
