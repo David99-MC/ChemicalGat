@@ -284,7 +284,7 @@ bool ABlasterCharacter::GetIsAiming() const
 
 void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 {
-	if (!GetEquippedWeapon())
+	if (GetEquippedWeapon() == nullptr)
 	{
 		// Update StartingBaseAimRotation even when unequipped
 		StartingBaseAimRotation = FRotator(0, GetBaseAimRotation().Yaw, 0); 
@@ -435,7 +435,7 @@ FVector ABlasterCharacter::GetHitTarget() const
 
 void ABlasterCharacter::PlayRifleMontage(bool bIsAiming)
 {
-	if (!GetEquippedWeapon())
+	if (GetEquippedWeapon() == nullptr)
 		return;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -462,6 +462,7 @@ void ABlasterCharacter::OnHealthUpdate()
 
 	// if (IsLocallyControlled()) //Client-specific functionality
 
+	// Functions that happen on both server and client
 	UpdateHUDHealth();
 
 	if (bIsEliminated)
@@ -504,7 +505,7 @@ void ABlasterCharacter::UpdateHUDHealth()
 
 void ABlasterCharacter::PlayHitReactMontage()
 {
-	if (!GetEquippedWeapon()) 
+	if (GetEquippedWeapon() == nullptr) 
 		return;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -519,6 +520,11 @@ void ABlasterCharacter::PlayHitReactMontage()
 /** This will only get called on the server where the game mode exists */
 void ABlasterCharacter::PlayerElim()
 {
+	if (GetEquippedWeapon() != nullptr)
+	{
+		GetEquippedWeapon()->Drop();
+	}
+
 	MulticastPlayerElim();
 	GetWorldTimerManager().SetTimer(
 		ElimTimer,
@@ -532,16 +538,29 @@ void ABlasterCharacter::PlayerElim()
 void ABlasterCharacter::MulticastPlayerElim_Implementation()
 {
 	bIsEliminated = true;
-	PlayElimMontage();
+	// PlayElimMontage();
 
+	// Start dissolve effect
 	if (DissolveMaterialInstance)
 	{
 		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
 		GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
 		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), 0.55f);
-		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 200.f);
+		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 150.f);
 	}
 	StartDissolve();
+
+	// Disable CharacterMovement
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	if (BlasterPlayerController)
+	{
+		DisableInput(BlasterPlayerController);
+	}
+
+	// Disable collision
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ABlasterCharacter::ElimTimerFinished()
