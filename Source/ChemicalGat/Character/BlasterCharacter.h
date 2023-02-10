@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "ChemicalGat/BlasterTypes/TurningInPlace.h"
 #include "ChemicalGat/Interfaces/InteractWithCrosshairInterface.h"
+#include "Components/TimelineComponent.h"
 
 #include "BlasterCharacter.generated.h"
 
@@ -103,6 +104,11 @@ private:
 	
 	void OnHealthUpdate();
 
+	UFUNCTION()
+	void UpdateDissolveMaterial(float DissolveValue);
+
+	void StartDissolve();
+
 private: // Variables
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
@@ -171,7 +177,6 @@ private: // Variables
 
 	UPROPERTY(EditAnywhere, Category = WeaponRotationCorrection)
 	float RightHandRotationRollOffset;
-	/** ---------------------------------------------- */
 
 	/**
 	 * Smoothing Proxies' rotation
@@ -181,7 +186,6 @@ private: // Variables
 	FRotator ProxyRotationLastFrame;
 	FRotator ProxyRotation;
 	float TimeSinceLastMovementReplication;
-	/** ---------------------------------------------- */
 
 	/**
 	 * Player Health and Stats
@@ -191,7 +195,6 @@ private: // Variables
 	
 	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = Stats)
 	float Health = 100.f;
-	/** ---------------------------------------------- */
 
 	ABlasterPlayerController* BlasterPlayerController;
 
@@ -204,8 +207,29 @@ private: // Variables
 
 	UPROPERTY(EditDefaultsOnly)
 	float ElimDelay = 3.f;
-	/** ---------------------------------------------- */
 
+	/**
+	 *  Dissolve effect
+	 * 
+	 * @param DissolveTrack the track with key frames used for the timeline
+	 * @param DissolveTimeline Timeline component which is bound by a callback that's called every frame to update the value on the curve
+	 * @param DissolveCurve responsible for smoothing the ScalarParameter Dissolve value
+	*/
+	UPROPERTY(VisibleAnywhere, Category = Elim)
+	UTimelineComponent* DissolveTimeline;
+
+	FOnTimelineFloat DissolveTrack;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* DissolveCurve;
+
+	// Material instance that can be changed at run time
+	UPROPERTY(VisibleAnywhere, Category = Elim)
+	UMaterialInstanceDynamic* DynamicDissolveMaterialInstance;
+
+	// Material used on the blueprint, used with the dynamic material
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UMaterialInstance* DissolveMaterialInstance;
 public:
 
 };
