@@ -15,11 +15,21 @@ struct FHUDPackage
 	GENERATED_BODY()
 
 public: // All these values to be set in the CombatComponent
+	UPROPERTY()
 	UTexture2D* CenterCrosshair;
+
+	UPROPERTY()
 	UTexture2D* TopCrosshair;
+
+	UPROPERTY()
 	UTexture2D* BottomCrosshair;
+
+	UPROPERTY()
 	UTexture2D* LeftCrosshair;
+
+	UPROPERTY()
 	UTexture2D* RightCrosshair;
+
 	float CrosshairSpread;
 	FLinearColor CrosshairColor; 
 };
@@ -47,6 +57,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	TSubclassOf<UUserWidget> CharacterOverlayClass;
 
+	UPROPERTY()
 	UCharacterOverlay* CharacterOverlay;
 
 private:

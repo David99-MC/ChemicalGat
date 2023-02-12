@@ -161,6 +161,9 @@ void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if (EquippedWeapon && BlasterCharacter)
 	{
+		BlasterCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
+		BlasterCharacter->bUseControllerRotationYaw = true;
+
 		// Calling SetWeaponState() again to make sure the weapon has updated its physics properties before attaching to Character
 		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 		const USkeletalMeshSocket* HandSocket = BlasterCharacter->GetMesh()->GetSocketByName(FName("RightHandSocket"));
@@ -168,9 +171,6 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		{
 			HandSocket->AttachActor(EquippedWeapon, BlasterCharacter->GetMesh());
 		}
-		
-		BlasterCharacter->GetCharacterMovement()->bOrientRotationToMovement = false;
-		BlasterCharacter->bUseControllerRotationYaw = true;
 	}
 }
 

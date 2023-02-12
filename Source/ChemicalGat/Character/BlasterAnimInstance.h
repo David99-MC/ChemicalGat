@@ -86,6 +86,7 @@ private:
 	
 	FRotator DeltaRotation;
 
+	UPROPERTY()
 	AWeapon* EquippedWeapon;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))

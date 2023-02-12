@@ -52,6 +52,7 @@ public:
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
 private:	
+	UPROPERTY()
 	ABlasterCharacter* BlasterCharacter;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
@@ -76,6 +77,7 @@ private:
 	 *  Aim crosshairs HUD
 	*/
 
+	UPROPERTY()
 	ABlasterHUD* BlasterHUD;
 
 	FHUDPackage HUDPackage;

@@ -19,6 +19,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
         FVector SpawnLocation = SocketTransform.GetLocation();
         FVector TargetDirection = HitTarget - SpawnLocation; 
         FRotator ToTargetRotation = TargetDirection.Rotation(); // Rotate the Spawned projectile in the given direction
+        
         FActorSpawnParameters SpawnParams;
         SpawnParams.Owner = GetOwner();
         SpawnParams.Instigator = PawnInstigator;

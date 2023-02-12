@@ -24,6 +24,7 @@ class ABlasterPlayerController;
 class UParticleSystem;
 class UParticleSystemComponent;
 class USoundCue;
+class ABlasterPlayerState;
 
 UCLASS()
 class CHEMICALGAT_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairInterface
@@ -108,9 +109,10 @@ private:
 	void SimulatedProxiesTurn();
 	void CalculateAOPitch();
 	void UpdateHUDHealth();
-	void UpdateHUDScore(float NewScore);
-	
 	void OnHealthUpdate();
+
+	// Poll for relevant classes and initialize the HUD
+	void PollInit();
 
 	UFUNCTION()
 	void UpdateDissolveMaterial(float DissolveValue);
@@ -202,6 +204,7 @@ private: // Variables
 	float Health = 100.f;
 
 	// Getting the Controller for HUD related functionalities
+	UPROPERTY()
 	ABlasterPlayerController* BlasterPlayerController;
 
 	/**
@@ -245,6 +248,9 @@ private: // Variables
 
 	UPROPERTY(EditAnywhere, Category = Elim)
 	USoundCue* ElimBotSoundCue;
+
+	UPROPERTY()
+	ABlasterPlayerState* BlasterPlayerState;
 
 public:
 

@@ -22,6 +22,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
+#include "ChemicalGat/PlayerState/BlasterPlayerState.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -96,7 +97,6 @@ void ABlasterCharacter::BeginPlay()
 		}
 	}
 	UpdateHUDHealth();
-	UpdateHUDScore(0.f);
 	if (HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
@@ -121,6 +121,7 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	}
 
 	HideMeshWhenCameraIsClose();
+	PollInit();
 }
 
 // Called to bind functionality to input
@@ -498,12 +499,17 @@ void ABlasterCharacter::UpdateHUDHealth()
 	}
 }
 
-void ABlasterCharacter::UpdateHUDScore(float NewScore)
+void ABlasterCharacter::PollInit()
 {
-	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
-	if (BlasterPlayerController)
+	// the PlayeState will be a nullptr in the first frame, so we poll it in Tick()
+	if (BlasterPlayerState == nullptr)
 	{
-		BlasterPlayerController->SetHUDScore(NewScore);
+		BlasterPlayerState = GetPlayerState<ABlasterPlayerState>();
+		if (BlasterPlayerState)
+		{
+			BlasterPlayerState->AddToScore(0.f);
+			BlasterPlayerState->AddToDefeat(0.f);
+		}
 	}
 }
 
@@ -530,6 +536,8 @@ void ABlasterCharacter::PlayerElim()
 	}
 
 	MulticastPlayerElim();
+
+	// Set a delay for ElimDelay amount of time before respawning
 	GetWorldTimerManager().SetTimer(
 		ElimTimer,
 		this,

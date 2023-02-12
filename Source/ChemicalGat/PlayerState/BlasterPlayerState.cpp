@@ -4,27 +4,55 @@
 #include "BlasterPlayerState.h"
 #include "ChemicalGat/Character/BlasterCharacter.h"
 #include "ChemicalGat/PlayerController/BlasterPlayerController.h"
+#include "Net/UnrealNetwork.h"
+
+void ABlasterPlayerState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(ABlasterPlayerState, Defeat);
+}
 
 void ABlasterPlayerState::AddToScore(float ScoreAmount)
 {
     float NewScore = GetScore() + ScoreAmount;
     SetScore(NewScore);
-
-    if (IsControllerValid())
-    {
-        BlasterController->SetHUDScore(NewScore);
-    }
+    OnScoreUpdate();
 }
 
 void ABlasterPlayerState::OnRep_Score()
 {
     Super::OnRep_Score();
 
-    if (IsControllerValid())
-    {
-        // Update the HUD through player controller
-        BlasterController->SetHUDScore(GetScore());
-    }
+    OnScoreUpdate();
+}
+
+void ABlasterPlayerState::OnScoreUpdate()
+{
+    if (!IsControllerValid())
+        return;
+
+    // Update the HUD through player controller
+    BlasterController->SetHUDScore(GetScore());
+}
+
+void ABlasterPlayerState::AddToDefeat(int32 DefeateAmount)
+{
+    Defeat += DefeateAmount;
+    OnDefeatUpdate();
+}
+
+void ABlasterPlayerState::OnRep_Defeat()
+{
+    OnDefeatUpdate();
+}
+
+void ABlasterPlayerState::OnDefeatUpdate()
+{
+    if (!IsControllerValid())
+        return;
+
+    BlasterController->SetHUDDefeat(Defeat);
 }
 
 bool ABlasterPlayerState::IsControllerValid()
