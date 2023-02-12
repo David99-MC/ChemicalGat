@@ -6,12 +6,22 @@
 #include "ChemicalGat/HUD/CharacterOverlay.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "ChemicalGat/Character/BlasterCharacter.h"
 
 void ABlasterPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
     BlasterHUD = Cast<ABlasterHUD>(GetHUD());
+}
+
+void ABlasterPlayerController::OnPossess(APawn* InPawn)
+{
+    Super::OnPossess(InPawn);
+    if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(InPawn))
+    {
+        SetHUDHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
+    }
 }
 
 void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)

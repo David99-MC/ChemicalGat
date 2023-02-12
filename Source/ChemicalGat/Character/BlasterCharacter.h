@@ -21,6 +21,9 @@ class AWeapon;
 class UCombatComponent;
 class UAnimMontage;
 class ABlasterPlayerController;
+class UParticleSystem;
+class UParticleSystemComponent;
+class USoundCue;
 
 UCLASS()
 class CHEMICALGAT_API ABlasterCharacter : public ACharacter, public IInteractWithCrosshairInterface
@@ -44,6 +47,8 @@ public:
 	FORCEINLINE float GetRightHandRotationRollOffset() const { return RightHandRotationRollOffset; }
 	FORCEINLINE bool GetShouldRotateRootBone() const { return bShouldRotateRootBone; }
 	FORCEINLINE bool GetIsEliminated() const { return bIsEliminated; }
+	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	AWeapon* GetEquippedWeapon() const;
 	bool GetIsAiming() const;
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -51,7 +56,6 @@ public:
 
 	void PlayRifleMontage(bool bIsAiming);
 	void PlayHitReactMontage();
-	void PlayElimMontage();
 	void PlayerElim();
 
 	void StopAnimation();
@@ -83,6 +87,8 @@ protected:
 
 	UFUNCTION()
 	virtual void ReceiveDamage(AActor* DamagedActor, float DamageAmount, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
+
+	virtual void Destroyed() override;
 
 private:
 	// A Remote Procedure Call (RPC) to allow the client to also pick up the weapon 
@@ -152,9 +158,6 @@ private: // Variables
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* HitReactMontage;
 
-	UPROPERTY(EditAnywhere, Category = Combat)
-	UAnimMontage* ElimMontage;
-
 	FVector HitTarget;
 
 	UPROPERTY(EditAnywhere, Category = Combat)
@@ -196,6 +199,7 @@ private: // Variables
 	UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = Stats)
 	float Health = 100.f;
 
+	// Getting the Controller for HUD related functionalities
 	ABlasterPlayerController* BlasterPlayerController;
 
 	/**
@@ -220,7 +224,7 @@ private: // Variables
 
 	FOnTimelineFloat DissolveTrack;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Elim)
 	UCurveFloat* DissolveCurve;
 
 	// Material instance that can be changed at run time
@@ -230,6 +234,16 @@ private: // Variables
 	// Material used on the blueprint, used with the dynamic material
 	UPROPERTY(EditAnywhere, Category = Elim)
 	UMaterialInstance* DissolveMaterialInstance;
+
+	UPROPERTY(EditAnywhere, Category = Elim)
+	UParticleSystem* ElimBot;
+
+	UPROPERTY(VisibleAnywhere, Category = Elim)
+	UParticleSystemComponent* ElimBotComponent;
+
+	UPROPERTY(EditAnywhere, Category = Elim)
+	USoundCue* ElimBotSoundCue;
+
 public:
 
 };

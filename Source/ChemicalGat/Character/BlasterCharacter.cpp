@@ -19,6 +19,9 @@
 #include "ChemicalGat/PlayerController/BlasterPlayerController.h"
 #include "ChemicalGat/GameMode/BlasterGameMode.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -447,15 +450,6 @@ void ABlasterCharacter::PlayRifleMontage(bool bIsAiming)
 	}
 }
 
-void ABlasterCharacter::PlayElimMontage()
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && ElimMontage)
-	{
-		AnimInstance->Montage_Play(ElimMontage);
-	}
-}
-
 void ABlasterCharacter::OnHealthUpdate()
 {
 	// if (HasAuthority()) //Server-specific functionality
@@ -538,13 +532,14 @@ void ABlasterCharacter::PlayerElim()
 void ABlasterCharacter::MulticastPlayerElim_Implementation()
 {
 	bIsEliminated = true;
-	// PlayElimMontage();
 
 	// Start dissolve effect
 	if (DissolveMaterialInstance)
 	{
 		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
 		GetMesh()->SetMaterial(0, DynamicDissolveMaterialInstance);
+
+		// After assigning the new dissolve material, set its scalar value before starting to dissolve
 		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Dissolve"), 0.55f);
 		DynamicDissolveMaterialInstance->SetScalarParameterValue(TEXT("Glow"), 150.f);
 	}
@@ -561,6 +556,23 @@ void ABlasterCharacter::MulticastPlayerElim_Implementation()
 	// Disable collision
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// Spawn ElimBot at 200 units above the character
+	FVector SpawnLocation = GetActorLocation();
+	SpawnLocation.Z += 200.f;
+	if (ElimBot)
+	{
+		ElimBotComponent = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			ElimBot,
+			SpawnLocation,
+			GetActorRotation()
+		);
+	}
+	if (ElimBotSoundCue)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ElimBotSoundCue, GetActorLocation(), 0.7f);
+	}
 }
 
 void ABlasterCharacter::ElimTimerFinished()
@@ -568,6 +580,16 @@ void ABlasterCharacter::ElimTimerFinished()
 	if (ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(GetWorld()->GetAuthGameMode()))
 	{
 		BlasterGameMode->RequestRespawn(this, Controller);
+	}
+}
+
+void ABlasterCharacter::Destroyed()
+{
+	Super::Destroyed();
+
+	if (ElimBotComponent)
+	{
+		ElimBotComponent->DestroyComponent();
 	}
 }
 
