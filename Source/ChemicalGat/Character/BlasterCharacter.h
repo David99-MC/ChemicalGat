@@ -51,8 +51,9 @@ public:
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 	AWeapon* GetEquippedWeapon() const;
 	bool GetIsAiming() const;
-	void SetOverlappingWeapon(AWeapon* Weapon);
 	FVector GetHitTarget() const;
+	
+	void SetOverlappingWeapon(AWeapon* Weapon);
 
 	void PlayRifleMontage(bool bIsAiming);
 	void PlayHitReactMontage();
