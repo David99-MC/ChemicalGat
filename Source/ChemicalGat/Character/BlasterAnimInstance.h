@@ -22,6 +22,9 @@ public:
 	void NativeInitializeAnimation() override;
 	void NativeUpdateAnimation(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
+	void StopAnimation();
+
 private:
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	ABlasterCharacter* BlasterCharacter;
@@ -83,10 +86,14 @@ private:
 	
 	FRotator DeltaRotation;
 
+	UPROPERTY()
 	AWeapon* EquippedWeapon;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	bool bShouldRotateRootBone;
+
+	UPROPERTY(BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	bool bIsEliminated;
 	
 private:
 	void SetYawOffset(float DeltaTime);

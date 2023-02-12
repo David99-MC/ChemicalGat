@@ -39,16 +39,20 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* ProjectileMovementComponent;
 
-	UPROPERTY(EditAnywhere, Category = VFX)
+	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* BulletTrail;
 
 	UNiagaraComponent* BulletTrailComponent;
 
-	UPROPERTY(EditAnywhere, Category = VFX)
+	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* ImpactParticle;
 
-	UPROPERTY(EditAnywhere, Category = VFX)
+	UPROPERTY(EditAnywhere)
 	USoundCue* ImpactSound;
 	
+
+protected:
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
 	
 };

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -54,6 +52,7 @@ public:
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
 private:	
+	UPROPERTY()
 	ABlasterCharacter* BlasterCharacter;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
@@ -74,7 +73,14 @@ private:
 
 	FVector HitTarget;
 
+	/**
+	 *  Aim crosshairs HUD
+	*/
+
+	UPROPERTY()
 	ABlasterHUD* BlasterHUD;
+
+	FHUDPackage HUDPackage;
 
 	UPROPERTY(EditAnywhere, Category = "Combat | Aiming")
 	float CrosshairShrinkFactor = 30.f;
@@ -90,8 +96,6 @@ private:
 	float CrosshairAimFactor;
 
 	float CrosshairShootingFactor;
-
-	FHUDPackage HUDPackage;
 
 	/**
 	 * 	Weapon Zooming/Scoping

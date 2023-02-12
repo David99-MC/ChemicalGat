@@ -56,6 +56,8 @@ void UBlasterAnimInstance::UpdateLocomotion()
         bShouldMove = true;
     else
         bShouldMove = false;
+    
+    bIsEliminated = BlasterCharacter->GetIsEliminated();
 }
 
 void UBlasterAnimInstance::UpdateCombat()
@@ -117,4 +119,12 @@ void UBlasterAnimInstance::SetLean(float DeltaTime)
     float Target = Delta.Yaw / DeltaTime;
     float Interp = FMath::FInterpTo(Lean, Target, DeltaTime, 6.f);
     Lean = FMath::Clamp(Interp, -90, 90);
+}
+
+void UBlasterAnimInstance::StopAnimation()
+{
+    if (BlasterCharacter == nullptr) 
+        return;
+
+    BlasterCharacter->StopAnimation();
 }

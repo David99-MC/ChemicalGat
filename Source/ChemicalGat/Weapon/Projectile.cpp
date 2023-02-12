@@ -65,10 +65,6 @@ void AProjectile::Tick(float DeltaTime)
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor))
-	{
-		BlasterCharacter->MulticastHit();
-	}
 	Destroy();
 }
 
@@ -77,6 +73,8 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
  * */
 void AProjectile::Destroyed()
 {
+	Super::Destroyed();
+	
 	if (ImpactParticle && ImpactSound)
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactParticle, GetActorLocation(), GetActorRotation());

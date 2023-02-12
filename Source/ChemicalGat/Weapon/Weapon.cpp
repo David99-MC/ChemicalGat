@@ -66,15 +66,22 @@ void AWeapon::Tick(float DeltaTime)
 void AWeapon::SetWeaponState(EWeaponState State)
 {
 	// The overlapping events are only being generated on the server 
-	// so we need to change it here on the server
+	// so SetWeaponState() will only be called on the server
 	WeaponState = State;
 	switch (WeaponState)
 	{
 	case EWeaponState::EWS_Equipped:
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
 		ShowPickupWidget(false);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision); 
+		UpdateWeaponPhysics(false);
 		break;
-	
+	case EWeaponState::EWS_Dropped:
+		if (HasAuthority())
+		{
+			AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+		UpdateWeaponPhysics(true);
+		break;
 	default:
 		break;
 	}
@@ -87,8 +94,11 @@ void AWeapon::OnRep_WeaponState()
 	{
 	case EWeaponState::EWS_Equipped:
 		ShowPickupWidget(false);
+		UpdateWeaponPhysics(false);
 		break;
-	
+	case EWeaponState::EWS_Dropped:
+		UpdateWeaponPhysics(true);
+		break;
 	default:
 		break;
 	}
@@ -123,4 +133,21 @@ void AWeapon::Fire(const FVector& HitTarget)
 	{
 		WeaponMesh->PlayAnimation(FireAnimation, false);
 	}
+}
+
+void AWeapon::Drop()
+{
+	SetWeaponState(EWeaponState::EWS_Dropped);
+
+	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+	WeaponMesh->DetachFromComponent(DetachRules);
+	
+	SetOwner(nullptr);
+}
+
+void AWeapon::UpdateWeaponPhysics(bool bEnabled)
+{
+	WeaponMesh->SetSimulatePhysics(bEnabled);
+	WeaponMesh->SetEnableGravity(bEnabled);
+	bEnabled == true ? WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics) : WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
