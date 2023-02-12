@@ -108,6 +108,7 @@ private:
 	void SimulatedProxiesTurn();
 	void CalculateAOPitch();
 	void UpdateHUDHealth();
+	void UpdateHUDScore(float NewScore);
 	
 	void OnHealthUpdate();
 

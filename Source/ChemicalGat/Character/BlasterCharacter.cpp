@@ -96,6 +96,7 @@ void ABlasterCharacter::BeginPlay()
 		}
 	}
 	UpdateHUDHealth();
+	UpdateHUDScore(0.f);
 	if (HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
@@ -322,6 +323,18 @@ void ABlasterCharacter::SetAimOffsets(float DeltaTime)
 	CalculateAOPitch();
 }
 
+void ABlasterCharacter::CalculateAOPitch()
+{
+	AOPitch = GetBaseAimRotation().Pitch;
+	if (AOPitch > 90.f && !IsLocallyControlled())
+	{
+		// Map AOPitch from [270, 360) to [-90, 0), taking the result when decompressing over the Internet
+		FVector2D InRange(270.f, 360.f);
+		FVector2D OutRange(-90.f, 0.f);
+		AOPitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AOPitch);
+	}
+}
+
 void ABlasterCharacter::OnRep_ReplicatedMovement()
 {
 	Super::OnRep_ReplicatedMovement();
@@ -365,18 +378,6 @@ void ABlasterCharacter::SimulatedProxiesTurn()
 	}
 	TurnInPlace = ETurnInPlace::ETIP_NotTurning;
 
-}
-
-void ABlasterCharacter::CalculateAOPitch()
-{
-	AOPitch = GetBaseAimRotation().Pitch;
-	if (AOPitch > 90.f && !IsLocallyControlled())
-	{
-		// Map AOPitch from [270, 360) to [-90, 0), taking the result when decompressing over the Internet
-		FVector2D InRange(270.f, 360.f);
-		FVector2D OutRange(-90.f, 0.f);
-		AOPitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AOPitch);
-	}
 }
 
 void ABlasterCharacter::SetTurnInPlace(float DeltaTime)
@@ -497,6 +498,15 @@ void ABlasterCharacter::UpdateHUDHealth()
 	}
 }
 
+void ABlasterCharacter::UpdateHUDScore(float NewScore)
+{
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDScore(NewScore);
+	}
+}
+
 void ABlasterCharacter::PlayHitReactMontage()
 {
 	if (GetEquippedWeapon() == nullptr) 
@@ -559,7 +569,7 @@ void ABlasterCharacter::MulticastPlayerElim_Implementation()
 
 	// Spawn ElimBot at 200 units above the character
 	FVector SpawnLocation = GetActorLocation();
-	SpawnLocation.Z += 200.f;
+	SpawnLocation.Z += 250.f;
 	if (ElimBot)
 	{
 		ElimBotComponent = UGameplayStatics::SpawnEmitterAtLocation(

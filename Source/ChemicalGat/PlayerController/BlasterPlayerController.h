@@ -23,5 +23,6 @@ private:
 
 public:
 	void SetHUDHealth(float Health, float MaxHealth); // to be called on BlasterCharacter class
+	void SetHUDScore(float NewScore); // to be called on BlasterPlayerState class
 	virtual void OnPossess(APawn* InPawn) override;
 };
