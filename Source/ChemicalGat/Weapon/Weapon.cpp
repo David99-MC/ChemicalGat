@@ -149,5 +149,16 @@ void AWeapon::UpdateWeaponPhysics(bool bEnabled)
 {
 	WeaponMesh->SetSimulatePhysics(bEnabled);
 	WeaponMesh->SetEnableGravity(bEnabled);
-	bEnabled == true ? WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics) : WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	if (bEnabled) // EWeaponState::EWS_Dropped
+	{
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+		WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	}
+	else // EWeaponState::EWS_Equipped
+	{
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
